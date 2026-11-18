@@ -1,0 +1,2962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draw2Scope</title>
+<style>
+ @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  
+  :root {
+    --scope-green: #00ff9f;
+    --scope-dark: #0a0f0a;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(#1a1f1a, #0f120f);
+    color: #ddd;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  
+  .header {
+    text-align: center;
+    padding: 20px 10px 10px;
+    background: #111;
+    border-bottom: 3px solid #003322;
+  }
+  
+  h1 {
+    font-family: 'Press Start 2P', system-ui;
+    font-size: 2.8rem;
+    margin: 0 0 8px;
+    background: linear-gradient(90deg, #00ff9f, #00cc7a, #00ff9f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 255, 159, 0.5);
+    letter-spacing: 3px;
+  }
+  
+  .subtitle {
+    font-size: 1.05rem;
+    color: #88aa88;
+    margin: 0;
+    font-weight: 400;
+  }
+  
+  .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px 10px;
+    flex-wrap: wrap;
+  }
+  
+  .panel {
+    background: #111;
+    border: 3px solid #334433;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  
+  .panel h3 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    color: #aaddaa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  canvas {
+    display: block;
+    border-radius: 6px;
+    image-rendering: crisp-edges;
+  }
+  
+  #drawCanvas {
+    background: #f4f7f4;
+    border: 2px solid #556655;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
+    cursor: crosshair;
+    touch-action: none;
+  }
+  
+  #scopeCanvas {
+    background: #0a0f0a;
+    border: 4px solid #223322;
+    box-shadow: 0 0 30px rgba(0, 40, 20, 0.9),
+                inset 0 0 40px rgba(0,0,0,0.7);
+    image-rendering: crisp-edges;
+  }
+  
+ #scopeFrame {
+   position: relative;
+    width: 512px;
+    height: 512px;
+ }
+  
+  #scopeHint {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    color: #446644;
+    font-family: system-ui, monospace;
+    font-size: 15px;
+    text-align: center;
+    white-space: pre-line;
+    line-height: 1.5;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+  
+    .freq-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    padding: 20px 10px;
+    background: #0d120d;
+    border: 3px solid #334433;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    margin-top: 42px;
+  }
+  
+  .freq-column h4 {
+    margin: 0 0 12px;
+    color: #88cc88;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  
+  .freq-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.35rem;
+    color: #00ff9f;
+    text-shadow: 0 0 12px #00ff9f;
+    margin: 4px 0 12px;
+    min-width: 110px;
+    text-align: center;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    accent-color: #00ff9f;
+    margin: 6px 0;
+  }
+  
+  input[type="number"] {
+    width: 118px;
+    background: #1a221a;
+    color: #00ff9f;
+    border: 2px solid #445544;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 1.05rem;
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+  }
+  
+  .controls {
+    max-width: 1100px;
+    margin: 10px auto 30px;
+    padding: 16px 20px;
+    background: #111;
+    border: 3px solid #334433;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  }
+  
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px 24px;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .control-group label {
+    font-size: 0.9rem;
+    color: #99bb99;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .control-group input[type="range"] {
+    width: 100%;
+  }
+  
+  .control-group .value {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #66aa66;
+    text-align: right;
+    min-width: 48px;
+  }
+  
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .checkbox-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #aaddaa;
+  }
+  
+  button {
+    background: #223322;
+    color: #ccffcc;
+    border: 2px solid #445544;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    font-weight: 500;
+  }
+  
+  button:hover {
+    background: #334433;
+    border-color: #00ff9f;
+    color: #fff;
+  }
+  
+  button:active {
+    transform: translateY(1px);
+  }
+
+  .shape-btn {
+    background: #223322;
+    color: #ccffcc;
+    border: 1px solid #445544;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.1s ease;
+  }
+
+  .shape-btn:hover {
+    background: #334433;
+    border-color: #00ff9f;
+  }
+  
+  .btn-danger {
+    border-color: #664444;
+    color: #ffaaaa;
+  }
+  
+  .btn-danger:hover {
+    background: #442222;
+    border-color: #ff6666;
+  }
+  
+  .instructions {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+    font-size: 0.9rem;
+    color: #779977;
+    line-height: 1.5;
+  }
+  
+  .scope-label {
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #66cc66;
+    pointer-events: none;
+    text-shadow: 0 0 4px #000;
+  }
+  .community-wrap {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    padding: 16px 20px;
+    background: #111;
+    border: 3px solid #334433;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  }
+  .community-wrap h2 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    color: #aaddaa;
+  }
+  .community-sub {
+    font-size: 0.82rem;
+    color: #668866;
+    margin: 0 0 12px;
+  }
+  .gallery-save-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .gallery-save-row input {
+    flex: 1;
+    min-width: 160px;
+    background: #1a221a;
+    color: #ccffcc;
+    border: 2px solid #445544;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.9rem;
+  }
+  #galleryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .g-card {
+    background: #0d120d;
+    border: 2px solid #334433;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .g-card canvas {
+    width: 100%;
+    height: 110px;
+    background: #0a0f0a;
+    border: 1px solid #223322;
+    border-radius: 4px;
+  }
+  .g-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    background: #0a0f0a;
+    border: 1px solid #223322;
+    border-radius: 4px;
+    display: block;
+  }
+  .g-name {
+    font-size: 0.82rem;
+    color: #ccffcc;
+    margin: 6px 0 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .g-meta {
+    font-size: 0.72rem;
+    color: #668866;
+    margin-bottom: 6px;
+  }
+  .g-btns {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .g-btns button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  #galleryStatus, #onlineStatus {
+    font-size: 0.78rem;
+    color: #668866;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<script type="text/x-server-plugin">
+var VERSION = 2;
+var SLOT_START = 8;
+var SLOT_SIZE = 576;
+var MAX_SLOTS = 400;
+var NAME_MAX = 24;
+var PTS_MAX = 100;
+var THUMB_MAX = 128;
+var THUMB_PREFIX = "https://user.uploads.dev/";
+var _view = null;
+function _v() {
+  if (!_view) _view = new DataView(state.buffer, state.byteOffset, state.length);
+  return _view;
+}
+function _init() {
+  var v = _v();
+  if (v.getUint8(0) !== VERSION) {
+    v.setUint8(0, VERSION);
+    v.setUint32(1, 1, true);
+    for (var s = 0; s < MAX_SLOTS; s++) v.setUint32(SLOT_START + s * SLOT_SIZE, 0, true);
+  }
+  if (v.getUint32(1, true) < 1) v.setUint32(1, 1, true);
+}
+function _slotOff(s) { return SLOT_START + s * SLOT_SIZE; }
+function _slotCount() {
+  var cap = Math.floor((state.length - SLOT_START) / SLOT_SIZE);
+  if (cap > MAX_SLOTS) cap = MAX_SLOTS;
+  if (cap < 1) cap = 1;
+  return cap;
+}
+function _readSlot(s) {
+  var v = _v();
+  var o = _slotOff(s);
+  var id = v.getUint32(o, true);
+  if (!id) return null;
+  var likes = v.getUint32(o + 4, true);
+  var time = v.getUint32(o + 8, true);
+  var nlen = v.getUint8(o + 12);
+  if (nlen > 32) nlen = 32;
+  var name = "";
+  for (var i = 0; i < nlen; i++) {
+    var c = v.getUint8(o + 13 + i);
+    if (c >= 32 && c < 127) name += String.fromCharCode(c);
+  }
+  var n = v.getUint16(o + 45, true);
+  if (n > PTS_MAX) n = PTS_MAX;
+  var pts = [];
+  for (var j = 0; j < n; j++) {
+    var x = v.getInt16(o + 47 + j * 4, true) / 1000;
+    var y = v.getInt16(o + 47 + j * 4 + 2, true) / 1000;
+    pts.push([x, y]);
+  }
+  var tlen = v.getUint8(o + 447);
+  if (tlen > THUMB_MAX) tlen = THUMB_MAX;
+  var thumb = "";
+  for (var k = 0; k < tlen; k++) {
+    var tc = v.getUint8(o + 448 + k);
+    if (tc >= 32 && tc < 127) thumb += String.fromCharCode(tc);
+  }
+  if (thumb.slice(0, THUMB_PREFIX.length) !== THUMB_PREFIX) thumb = "";
+  return { id: id, name: name, likes: likes, time: time, pts: pts, thumb: thumb };
+}
+function _writeSlot(s, id, name, likes, time, qpts, thumb) {
+  var v = _v();
+  var o = _slotOff(s);
+  v.setUint32(o, id, true);
+  v.setUint32(o + 4, likes, true);
+  v.setUint32(o + 8, time, true);
+  var nlen = name.length;
+  if (nlen > NAME_MAX) nlen = NAME_MAX;
+  v.setUint8(o + 12, nlen);
+  for (var i = 0; i < 32; i++) {
+    var c = i < nlen ? name.charCodeAt(i) : 0;
+    if (c < 32 || c > 126) c = 63;
+    v.setUint8(o + 13 + i, c);
+  }
+  var n = qpts.length;
+  if (n > PTS_MAX) n = PTS_MAX;
+  v.setUint16(o + 45, n, true);
+  for (var j = 0; j < PTS_MAX; j++) {
+    var x = 0, y = 0;
+    if (j < n) { x = qpts[j][0]; y = qpts[j][1]; }
+    v.setInt16(o + 47 + j * 4, x, true);
+    v.setInt16(o + 47 + j * 4 + 2, y, true);
+  }
+  if (typeof thumb !== "string") thumb = "";
+  if (thumb.length > THUMB_MAX) thumb = thumb.slice(0, THUMB_MAX);
+  v.setUint8(o + 447, thumb.length);
+  for (var t = 0; t < THUMB_MAX; t++) {
+    var chc = t < thumb.length ? thumb.charCodeAt(t) : 0;
+    if (chc < 32 || chc > 126) chc = 0;
+    v.setUint8(o + 448 + t, chc);
+  }
+}
+function _findById(id) {
+  var v = _v();
+  var cap = _slotCount();
+  for (var s = 0; s < cap; s++) {
+    if (v.getUint32(_slotOff(s), true) === id) return s;
+  }
+  return -1;
+}
+function _findEmpty() {
+  var v = _v();
+  var cap = _slotCount();
+  for (var s = 0; s < cap; s++) {
+    if (v.getUint32(_slotOff(s), true) === 0) return s;
+  }
+  return -1;
+}
+function _findOldest() {
+  var v = _v();
+  var cap = _slotCount();
+  var best = -1, bestTime = 4294967295;
+  for (var s = 0; s < cap; s++) {
+    var id = v.getUint32(_slotOff(s), true);
+    if (!id) return s;
+    var t = v.getUint32(_slotOff(s) + 8, true);
+    if (t < bestTime) { bestTime = t; best = s; }
+  }
+  return best;
+}
+var _lastSaveConn = {};
+var _lastSaveNet = {};
+var _lastLikeConn = {};
+var _likedByConn = {};
+function _rl(map, key, ms) {
+  var now = Date.now();
+  var last = map[key] || 0;
+  if (now - last < ms) return false;
+  map[key] = now;
+  // Bound ephemeral rate-limit maps: keys grow with unique conns/nets.
+  // Resetting is safe (only allows one extra burst). Checked rarely to stay cheap.
+  if (map === _lastSaveNet) {
+    // prune oldest when huge (insertion-ordered keys)
+    var n = 0;
+    for (var kk in map) n++;
+    if (n > 5000) {
+      var drop = n - 4000;
+      for (var k2 in map) { delete map[k2]; if (--drop <= 0) break; }
+    }
+  }
+  return true;
+}
+function _cleanName(n) {
+  if (typeof n !== "string") return null;
+  n = n.replace(/^\s+|\s+$/g, "").slice(0, NAME_MAX);
+  if (n.length < 1) return null;
+  var out = "";
+  for (var i = 0; i < n.length; i++) {
+    var c = n.charCodeAt(i);
+    if (c >= 32 && c < 127) out += n.charAt(i);
+  }
+  out = out.replace(/^\s+|\s+$/g, "");
+  if (!out) return null;
+  return out;
+}
+function _cleanThumb(t) {
+  if (typeof t !== "string" || !t) return "";
+  if (t.length > THUMB_MAX) return "";
+  if (t.slice(0, THUMB_PREFIX.length) !== THUMB_PREFIX) return "";
+  for (var i = 0; i < t.length; i++) {
+    var c = t.charCodeAt(i);
+    if (c < 32 || c > 126) return "";
+  }
+  return t;
+}
+self.onopen = function(e) {
+  _init();
+  e.conn.subscribe("gallery");
+};
+self.onclose = function(e) {
+  delete _lastSaveConn[e.conn.id];
+  delete _lastLikeConn[e.conn.id];
+  delete _likedByConn[e.conn.id];
+};
+self.rpc = {
+  getPage: function(ctx, data) {
+    _init();
+    var off = 0, lim = 24;
+    try {
+      var parts = String(data).split(":");
+      off = parseInt(parts[0], 10) || 0;
+      lim = parseInt(parts[1], 10) || 24;
+    } catch (err) {}
+    if (off < 0) off = 0;
+    if (lim < 1) lim = 1;
+    if (lim > 24) lim = 24;
+    var v = _v();
+    var cap = _slotCount();
+    var all = [];
+    for (var s = 0; s < cap; s++) {
+      var it = _readSlot(s);
+      if (it) all.push(it);
+    }
+    all.sort(function(a, b) { return b.id - a.id; });
+    var total = all.length;
+    var slice = all.slice(off, off + lim);
+    return JSON.stringify({ total: total, items: slice });
+  },
+  save: function(ctx, data) {
+    _init();
+    if (!_rl(_lastSaveConn, ctx.conn.id, 10000)) return JSON.stringify({ ok: false, err: "slow down" });
+    var nk = "n" + ctx.conn.net[3];
+    if (!_rl(_lastSaveNet, nk, 30000)) return JSON.stringify({ ok: false, err: "slow down" });
+    var obj;
+    try { obj = JSON.parse(String(data)); } catch (err) { return JSON.stringify({ ok: false, err: "bad json" }); }
+    var name = _cleanName(obj && obj.name);
+    var pts = obj && obj.pts;
+    if (!name) return JSON.stringify({ ok: false, err: "bad name" });
+    if (!(pts instanceof Array) || pts.length < 8 || pts.length > PTS_MAX) return JSON.stringify({ ok: false, err: "bad shape" });
+    var q = [];
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      if (!(p instanceof Array) || p.length < 2) return JSON.stringify({ ok: false, err: "bad shape" });
+      var x = Number(p[0]), y = Number(p[1]);
+      if (!isFinite(x) || !isFinite(y) || x < -1.2 || x > 1.2 || y < -1.2 || y > 1.2) return JSON.stringify({ ok: false, err: "bad shape" });
+      var xi = Math.round(x * 1000);
+      var yi = Math.round(y * 1000);
+      if (xi < -1200) xi = -1200; if (xi > 1200) xi = 1200;
+      if (yi < -1200) yi = -1200; if (yi > 1200) yi = 1200;
+      q.push([xi, yi]);
+    }
+    var v = _v();
+    var id = v.getUint32(1, true);
+    v.setUint32(1, id + 1, true);
+    var now = Math.floor(Date.now() / 1000);
+    var s = _findEmpty();
+    if (s < 0) s = _findOldest();
+    if (s < 0) return JSON.stringify({ ok: false, err: "full" });
+    _writeSlot(s, id, name, 0, now, q, _cleanThumb(obj && obj.thumb));
+    var item = _readSlot(s);
+    try { pubsub.publish("gallery", JSON.stringify({ t: "add", item: item })); } catch (err) {}
+    return JSON.stringify({ ok: true, id: id });
+  },
+  like: function(ctx, data) {
+    _init();
+    if (!_rl(_lastLikeConn, ctx.conn.id, 2000)) return JSON.stringify({ ok: false, err: "slow down" });
+    var id = parseInt(String(data), 10);
+    if (!id || id < 1) return JSON.stringify({ ok: false, err: "bad id" });
+    // Per-connection double-click guard (conn ids are ephemeral; onclose drops the whole map,
+    // so closed connections can never leak — the old flat "conn:id" keys were never cleaned).
+    var seen = _likedByConn[ctx.conn.id];
+    if (!seen) { seen = {}; _likedByConn[ctx.conn.id] = seen; }
+    if (seen[id]) return JSON.stringify({ ok: false, err: "already liked" });
+    seen[id] = 1;
+    var s = _findById(id);
+    if (s < 0) return JSON.stringify({ ok: false, err: "not found" });
+    var v = _v();
+    var o = _slotOff(s);
+    var likes = v.getUint32(o + 4, true);
+    if (likes < 999999) likes++;
+    v.setUint32(o + 4, likes, true);
+    try { pubsub.publish("gallery", JSON.stringify({ t: "like", id: id, likes: likes })); } catch (err) {}
+    return JSON.stringify({ ok: true, likes: likes });
+  }
+};
+</script>
+  <div class="header">
+    <h1>DRAW2SCOPE</h1>
+    <p class="subtitle">Draw a shape • Watch it trace faithfully on the oscilloscope • Hear it in stereo</p>
+  </div>
+
+  <div class="main-container">
+    <!-- DRAW BOX -->
+    <div class="panel">
+      <h3>✏️ DRAW BOX</h3>
+      <div id="shapeSuggestionBar" style="margin-bottom:10px; padding:8px 10px; background:#1a221a; border:2px solid #00cc7755; border-radius:8px; box-shadow:0 0 10px rgba(0,255,130,0.1);">
+        <div style="font-size:0.82rem; color:#88cc88; margin-bottom:6px; display:flex; align-items:center; gap:5px;">
+          💡 <span>Did you mean…</span>
+        </div>
+        <div id="suggestionButtons" style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
+      </div>
+      <canvas id="drawCanvas" width="420" height="420"></canvas>
+      <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button id="clearBtn">Clear Drawing</button>
+        <button id="defaultBtn">Load Default Shape</button>
+        <button id="lissajousGridBtn" style="background:#334433; border-color:#00cc99;">Lissajous Grid</button>
+      </div>
+      <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 0.8rem; color: #88aa88;">
+        <span>Draw Line</span>
+        <input type="range" id="drawLineSlider" min="1" max="8" step="0.5" value="2.5" style="width: 120px;">
+        <span id="drawLineVal">2.5</span>
+      </div>
+      <div style="margin-top: 8px; text-align: center;">
+        <!-- Perfect Drawing button removed - replaced by AutoDraw-style suggestion bar -->
+      </div>
+    </div>
+
+    <!-- FREQUENCY (between boxes) -->
+    <div class="freq-column">
+      <h4>⚡ FREQUENCY</h4>
+      <div class="freq-value" id="freqValue">60.0 Hz</div>
+      
+      <div style="width: 100%; padding: 0 4px;">
+        <input type="range" id="freqSlider" min="0" max="1000" step="0.1" value="60">
+      </div>
+      <div style="font-size: 0.7rem; color: #668866; margin-bottom: 4px;">0 — 1000 Hz</div>
+      
+      <div style="display: flex; align-items: center; gap: 6px; margin-top: 8px;">
+        <input type="number" id="freqInput" min="0" max="20000" step="1" value="60">
+        <span style="color:#668866; font-size:0.85rem;">Hz</span>
+      </div>
+      <div style="font-size: 0.65rem; color: #557755; text-align: center; margin-top: 4px; line-height: 1.3;">
+        Type any value<br>up to 20000 Hz
+      </div>
+      
+      <div style="margin-top: 16px; font-size: 0.75rem; color: #557755; text-align: center;">
+        Controls tracing speed<br>&amp; sound pitch
+      </div>
+    </div>
+
+    <!-- OSCILLOSCOPE DISPLAY -->
+    <div class="panel" style="position: relative;">
+      <h3>📺 OSCILLOSCOPE</h3>
+      
+      <!-- Normal scope view -->
+      <div id="scopeView">
+        <div id="scopeFrame">
+          <canvas id="scopeCanvas" width="512" height="512"></canvas>
+          <div id="scopeHint" class="scope-hint"></div>
+          <div id="modeLabel" class="scope-label" style="top: 8px; left: 10px;">XY MODE</div>
+          <div id="freqLabel" class="scope-label" style="top: 8px; right: 10px;">60.0 Hz</div>
+        </div>
+      </div>
+      
+      <!-- Lissajous Grid replacement view -->
+      <div id="lissajousGridView" style="display: none; width: 512px; height: 512px; background: #0a0f0a; border-radius: 6px; padding: 12px; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="color: #88aa88; font-size: 0.9rem;">Select a Lissajous Curve</div>
+          <button id="closeGridBtn" style="font-size: 0.75rem; padding: 2px 8px;">Close Grid</button>
+        </div>
+        <div id="lissajousGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="controls-grid">
+      
+      <!-- Mode & Sound -->
+      <div class="control-group">
+        <label style="margin-bottom: 6px; font-weight: 600; color: #aaddaa;">DISPLAY MODE</label>
+        <div class="checkbox-row">
+          <label>
+            <input type="checkbox" id="sweepCheck"> 
+            <span>Sweep Mode (YT Waveform)</span>
+          </label>
+        </div>
+        <div class="checkbox-row" style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="oscillateCheck"> 
+            <span>Oscillate (sinusoidal back &amp; forth)</span>
+          </label>
+        </div>
+        <div class="checkbox-row" style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="autoCloseCheck"> 
+            <span>Auto-Close (make open paths loop seamlessly)</span>
+          </label>
+        </div>
+        <div class="checkbox-row" style="margin-top: 8px;">
+          <label>
+            <input type="checkbox" id="soundCheck"> 
+            <span>🔊 Enable Sound (stereo XY)</span>
+          </label>
+        </div>
+        <div style="margin-top: 6px; display:flex; align-items:center; gap:8px;">
+          <label style="font-size:0.85rem; color:#99bb99; min-width:50px;">Volume</label>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.6" style="flex:1;">
+          <span id="volValue" class="value">0.60</span>
+        </div>
+        
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #223322;">
+          <div class="checkbox-row">
+            <label>
+              <input type="checkbox" id="micCheck"> 
+              <span>🎤 Use Microphone as Signal Generator</span>
+            </label>
+          </div>
+          <div class="checkbox-row" style="margin-top: 6px;">
+            <label>
+              <input type="checkbox" id="micStereoCheck"> 
+              <span>🔄 Mono→Stereo (Phase Shift for Lissajous)</span>
+            </label>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; margin-top: 6px;">
+            <span style="font-size:0.8rem; color:#88aa88; width:58px;">Phase</span>
+            <input type="range" id="micPhaseSlider" min="0" max="360" step="1" value="90" style="flex:1;">
+            <span id="micPhaseVal" class="value" style="width:42px;">90°</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #557755; margin-top: 4px; line-height: 1.3;">
+            Mic input replaces drawing as the scope signal source.<br>
+            Phase shift creates Lissajous patterns from any sound.
+          </div>
+        </div>
+      </div>
+
+      <!-- Persistence & Brightness -->
+      <div class="control-group">
+        <label>PERSISTENCE &amp; BRIGHTNESS</label>
+        <div style="display:flex; gap:12px; align-items:flex-end;">
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#88aa88;">
+              <span>Persistence</span><span id="persistVal">35</span>
+            </div>
+            <input type="range" id="persistSlider" min="5" max="95" step="1" value="35">
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#88aa88;">
+              <span>Brightness</span><span id="brightVal">75</span>
+            </div>
+            <input type="range" id="brightSlider" min="10" max="100" step="1" value="75">
+          </div>
+        </div>
+      </div>
+
+      <!-- Transform: Rotate & Scale -->
+      <div class="control-group">
+        <label>SHAPE TRANSFORMS</label>
+        
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.8rem; color:#88aa88; width:52px;">Rotate</span>
+          <input type="range" id="rotateSlider" min="-180" max="180" step="1" value="0" style="flex:1;">
+          <span id="rotateVal" class="value" style="width:42px;">0°</span>
+        </div>
+        
+        <!-- New continuous rotate frequency -->
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.8rem; color:#88aa88; width:52px;">Rot. Freq</span>
+          <input type="range" id="rotateFreqSlider" min="-1000" max="1000" step="0.1" value="0" style="flex:1;">
+          <input type="number" id="rotateFreqInput" min="-20000" max="20000" step="1" value="0" style="width: 58px; font-size:0.85rem; padding:2px 4px;">
+          <span style="font-size:0.7rem; color:#668866;">Hz</span>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.8rem; color:#88aa88; width:52px;">Scale</span>
+          <input type="range" id="scaleSlider" min="0.1" max="4.0" step="0.05" value="1.0" style="flex:1;">
+          <span id="scaleVal" class="value" style="width:42px;">1.00</span>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span style="font-size:0.8rem; color:#88aa88; width:52px;">Offset X</span>
+          <input type="range" id="offsetXSlider" min="-2" max="2" step="0.01" value="0" style="flex:1;">
+          <span id="offsetXVal" class="value" style="width:42px;">0.00</span>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center; margin-top:2px;">
+          <span style="font-size:0.8rem; color:#88aa88; width:52px;">Offset Y</span>
+          <input type="range" id="offsetYSlider" min="-2" max="2" step="0.01" value="0" style="flex:1;">
+          <span id="offsetYVal" class="value" style="width:42px;">0.00</span>
+        </div>
+        
+        <button id="resetTransBtn" style="margin-top: 8px; width: 100%; font-size: 0.82rem; padding: 5px 10px;">Reset All Transforms</button>
+      </div>
+
+      <!-- Dot & Trace styling -->
+      <div class="control-group">
+        <label>TRACE STYLE</label>
+        
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span style="font-size:0.8rem; color:#88aa88; width:58px;">Trace Width</span>
+          <input type="range" id="traceWidthSlider" min="0.5" max="5" step="0.1" value="1.8" style="flex:1;">
+          <span id="traceWidthVal" class="value" style="width:32px;">1.8</span>
+        </div>
+        
+        <div style="margin-top: 10px; font-size: 0.75rem; color: #668866; line-height: 1.4;">
+          • Draw in left box (mouse or touch)<br>
+          • Shape is traced exactly on scope<br>
+          • Sound = X (left) + Y (right) channels
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="instructions">
+    <strong>How to use:</strong> Draw in the Draw Box (new strokes add to the drawing — only Clear Drawing empties it). Watch the dot trace your exact path on the Oscilloscope in real time. 
+    Toggle <strong>Sweep Mode</strong> to see your shape's Y-profile as a classic waveform. Enable sound to hear the curve as stereo audio (left = X position, right = Y position). 
+    The frequency controls both visual tracing speed and the pitch of the sound. Use sliders to rotate, scale, offset the shape live. Persistence creates phosphor afterglow effect.
+    <br><strong>Oscillate mode:</strong> For open shapes (C, U, lines, arcs etc.) the dot smoothly travels back and forth along your stroke with sinusoidal motion (slows at ends, reverses direction smoothly). Audio becomes a clean, constant sine-like tone instead of buzzy sawtooth from position jumps.
+    <br><strong>Microphone mode:</strong> Check "Use Microphone" to feed live audio into the scope instead of the drawn shape. Enable "Mono→Stereo" with a phase shift to draw Lissajous patterns from any sound — a pure tone at 90° makes a circle, music makes rich evolving patterns.
+  </div>
+
+  <div class="community-wrap">
+    <h2>🌐 Public Gallery</h2>
+    <p class="community-sub">Share your shape with everyone. Click Load to trace it on your scope. <span id="onlineStatus"></span></p>
+    <div class="gallery-save-row">
+      <input id="galleryNameInput" maxlength="24" placeholder="Name your shape…">
+      <button id="saveToGalleryBtn">Share current drawing</button>
+      <button id="refreshGalleryBtn">Refresh</button>
+    </div>
+    <div id="galleryGrid"></div>
+    <div id="galleryStatus">Connecting…</div>
+  </div>
+
+  <div class="community-wrap">
+    <h2>💬 Comments</h2>
+    <p class="community-sub">Tips, favourite shapes, oscilloscope music links — be friendly.</p>
+    <div id="commentsCtn"></div>
+  </div>
+
+  <script src="src/doodal-scope.js?v=1"></script>
+  <script>
+    // ==================== VARIABLES ====================
+    let drawCanvas, drawCtx;
+    let scopeCanvas;
+    
+    // Doodal CRT renderer state — exact dood.al/oscilloscope pipeline (src/doodal-scope.js)
+    let doodalActive = false;
+    const DOODAL_BUFFER = 1024;
+    // Live display controls — same fields and semantics as dood.al's `controls`.
+    // Fixed at dood.al defaults except persistence/exposure (sliders) and sweepOn.
+    const doodal = {
+      swapXY: false,
+      sweepOn: false,
+      sweepMsDiv: 1,
+      sweepTriggerValue: 0,
+      signalGeneratorOn: false,
+      mainGain: 0.0,
+      exposureStops: 0.0,
+      audioVolume: 1.0,
+      hue: 125,
+      freezeImage: false,
+      disableFilter: false,
+      invertXY: false,
+      grid: true,
+      persistence: 0
+    };
+    let doodalLineSize = 0.015; // dood.al default uSize (trace-width slider scales around it)
+    // Scope sample buffers (dood.al processes 1024-sample audio blocks, Lanczos x6)
+    let scopeX = new Float32Array(DOODAL_BUFFER);
+    let scopeY = new Float32Array(DOODAL_BUFFER);
+    let scopeOldX = new Float32Array(DOODAL_BUFFER);
+    let scopeOldY = new Float32Array(DOODAL_BUFFER);
+    let scopeSmX = null, scopeSmY = null; // allocated after Filter.init
+    let sweepPosition = -1;
+    let belowTrigger = false;
+
+    // Audible signal master (speaker-side only — the scope taps pre-volume samples,
+    // same as dood.al's scopeNode sitting before its audioVolumeNode).
+    const AUDIBLE_MASTER = 0.8;
+    
+   let currentPath = [];
+   let strokePoints = [];
+   let isDrawing = false;
+    // All committed freehand strokes (each stroke = array of {x,y}).
+    // Draw Box renders every stroke; the scope traces their concatenation.
+    // Only the Clear button / 'C' key empties this — starting a new stroke never does.
+    let drawStrokes = [];
+
+    let currentFreq = 60.0;
+    let sweepMode = false;
+    let oscillateMode = false;
+    let autoClose = false;
+    let soundEnabled = false;
+    
+    let audioCtx = null;
+    let scriptNode = null;
+    let gainNode = null;
+    
+    // Display parameters (updated from sliders; scope look itself is dood.al's pipeline)
+    let traceWidth = 1.8;
+    let drawLineWidth = 2.5;  // stroke width while drawing (user adjustable)
+    let rotation = 0;       // static angle in radians
+    let rotateFreq = 0;     // continuous rotation speed in Hz (new)
+    let scaleVal = 1.0;
+    let offsetX = 0;
+    let offsetY = 0;
+    
+    let animationRunning = false;
+    
+    // High-resolution seamless audio tables (resampled from drawing for click-free looping)
+    let audioX = new Float32Array(4096);
+    let audioY = new Float32Array(4096);
+    
+    // Persistent phase accumulator for sample-accurate, glitch-free audio
+    let audioPhase = 0;
+    let audioRotatePhase = 0;   // for rotateFreq (supports negative values for direction)
+    let audioOscPhase = 0;      // unbounded accumulator for PERFECTLY smooth sinusoidal oscillation (no modulo jumps)
+    
+    let pathIsClosed = false;
+    
+    // ==================== MICROPHONE INPUT ====================
+    let micEnabled = false;
+    let micStream = null;
+    let micAnalyser = null;
+    let micTimeData = null;
+    let micTimeDataR = null; // right channel for true stereo input
+    let micPhase = 0; // stereo phase offset (radians) for mono→stereo conversion
+    let micIsStereo = false; // true if mic input has 2 channels
+    let lastMicLissajous = null; // last captured normalized Lissajous points (for freeze-to-draw-box)
+    
+    // ==================== HILBERT TRANSFORM VIA OVERLAP-SAVE FFT ====================
+    // Computes a frequency-independent 90° phase shift (quadrature) of the mic
+    // input. Uses FFT (for perfect phase + unity magnitude across all frequencies)
+    // with overlap-save (previous frame provides context) and edge-skipping in the
+    // draw code (to eliminate circular-convolution artifacts at buffer boundaries).
+    //
+    // The FFT approach gives perfect magnitude (unlike FIR which attenuates low
+    // frequencies, causing "angular" Lissajous shapes). Edge artifacts from the
+    // FFT's periodic assumption are pushed into the overlap region and skipped.
+    let fftRe = new Float32Array(4096);
+    let fftIm = new Float32Array(4096);
+    let micQ = new Float32Array(2048);  // quadrature (90°-shifted) output
+    let micI = new Float32Array(2048);  // in-phase (DC-blocked) output
+    let micPrevBlock = new Float32Array(2048); // previous frame's DC-blocked data
+    let micDCPrevX = 0; // DC blocker: previous input sample
+    let micDCPrevY = 0; // DC blocker: previous output sample
+    
+    function fft(re, im, inverse) {
+      const n = re.length;
+      for (let i = 1, j = 0; i < n; i++) {
+        let bit = n >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) {
+          let tr = re[i]; re[i] = re[j]; re[j] = tr;
+          let ti = im[i]; im[i] = im[j]; im[j] = ti;
+        }
+      }
+      for (let len = 2; len <= n; len <<= 1) {
+        const ang = (inverse ? 2 : -2) * Math.PI / len;
+        const wRe = Math.cos(ang), wIm = Math.sin(ang);
+        for (let i = 0; i < n; i += len) {
+          let curRe = 1, curIm = 0;
+          for (let j = 0; j < len / 2; j++) {
+            const uRe = re[i + j], uIm = im[i + j];
+            const vRe = re[i + j + len/2] * curRe - im[i + j + len/2] * curIm;
+            const vIm = re[i + j + len/2] * curIm + im[i + j + len/2] * curRe;
+            re[i + j] = uRe + vRe; im[i + j] = uIm + vIm;
+            re[i + j + len/2] = uRe - vRe; im[i + j + len/2] = uIm - vIm;
+            const newRe = curRe * wRe - curIm * wIm;
+            curIm = curRe * wIm + curIm * wRe;
+            curRe = newRe;
+          }
+        }
+      }
+      if (inverse) {
+        for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+      }
+    }
+    
+    // Compute quadrature (Hilbert transform) of the input buffer via overlap-save FFT.
+    // Processes a 2N buffer [previous frame | current frame] and extracts the
+    // current N samples. The previous frame provides context so the FFT doesn't
+    // see a hard discontinuity at the start of the current frame.
+    // A DC blocker removes any mic DC offset that would skew the Lissajous pattern.
+    function computeHilbertFFT(input, N) {
+      const N2 = N * 2;
+      if (fftRe.length !== N2) {
+        fftRe = new Float32Array(N2);
+        fftIm = new Float32Array(N2);
+        micQ = new Float32Array(N);
+        micI = new Float32Array(N);
+        micPrevBlock = new Float32Array(N);
+      }
+      const re = fftRe, im = fftIm;
+      
+      // First half = previous frame's DC-blocked data (provides overlap context)
+      for (let i = 0; i < N; i++) {
+        re[i] = micPrevBlock[i];
+        im[i] = 0;
+      }
+      
+      // Second half = current frame's DC-blocked data
+      const R = 0.999;
+      for (let i = 0; i < N; i++) {
+        const x = input[i];
+        const y = x - micDCPrevX + R * micDCPrevY;
+        micDCPrevX = x;
+        micDCPrevY = y;
+        re[N + i] = y;
+        im[N + i] = 0;
+        micI[i] = y;        // save DC-blocked in-phase for drawing
+        micPrevBlock[i] = y; // save for next frame's overlap
+      }
+      
+      // FFT, apply Hilbert transform (multiply positive freqs by -j, negative by +j)
+      fft(re, im, false);
+      re[0] = 0; im[0] = 0;
+      re[N2/2] = 0; im[N2/2] = 0;
+      for (let k = 1; k < N2/2; k++) {
+        const tr = im[k]; const ti = -re[k];
+        re[k] = tr; im[k] = ti;
+        const tr2 = -im[N2-k]; const ti2 = re[N2-k];
+        re[N2-k] = tr2; im[N2-k] = ti2;
+      }
+      fft(re, im, true);
+      
+      // Extract the current frame's quadrature from the second half
+      for (let i = 0; i < N; i++) micQ[i] = re[N + i];
+    }
+    
+    // ==================== HELPER FUNCTIONS ====================
+    function getPointerPos(e, canvas) {
+      const rect = canvas.getBoundingClientRect();
+      let clientX, clientY;
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+    
+    function getNormPoint(pixelX, pixelY, canvasW, canvasH) {
+      // Map to -1..1 with Y positive UP (matches visual expectation)
+      const nx = ((pixelX / canvasW) - 0.5) * 2;
+      const ny = (0.5 - (pixelY / canvasH)) * 2;
+      return { x: nx, y: ny };
+    }
+    
+    function getBasePos(phase) {
+      if (!currentPath || currentPath.length === 0) return { x: 0, y: 0 };
+      if (currentPath.length === 1) return currentPath[0];
+      const N = currentPath.length;
+      if (pathIsClosed) {
+        let idx = phase * N;
+        let i = Math.floor(idx) % N;
+        let frac = idx - Math.floor(idx);
+        const p1 = currentPath[i];
+        const p2 = currentPath[(i + 1) % N];
+        return { x: p1.x * (1 - frac) + p2.x * frac, y: p1.y * (1 - frac) + p2.y * frac };
+      }
+      let idx = phase * (N - 1);
+      let i = Math.floor(idx);
+      let frac = idx - i;
+      if (i >= N - 1) return currentPath[N - 1];
+      const p1 = currentPath[i];
+      const p2 = currentPath[i + 1];
+      return { x: p1.x * (1 - frac) + p2.x * frac, y: p1.y * (1 - frac) + p2.y * frac };
+    }
+    
+    // ==================== SEAMLESS AUDIO WAVEFORM (fixes popping) ====================
+    function updateAudioBuffer() {
+      const TABLE_SIZE = 4096;
+      audioX = new Float32Array(TABLE_SIZE);
+      audioY = new Float32Array(TABLE_SIZE);
+      
+      if (!currentPath || currentPath.length < 2) return;
+      
+      for (let i = 0; i < TABLE_SIZE; i++) {
+        const ph = pathIsClosed ? i / TABLE_SIZE : i / (TABLE_SIZE - 1);
+        const p = getBasePos(ph);
+        audioX[i] = p.x;
+        audioY[i] = p.y;
+      }
+      
+      if (pathIsClosed) {
+        audioX[TABLE_SIZE - 1] = audioX[0];
+        audioY[TABLE_SIZE - 1] = audioY[0];
+        const SMOOTH = 5;
+        for (let k = 1; k <= SMOOTH; k++) {
+          const w = k / (SMOOTH + 1);
+          const endIdx = TABLE_SIZE - k;
+          const startIdx = k - 1;
+          audioX[endIdx] = audioX[endIdx] * (1 - w) + audioX[startIdx] * w;
+          audioY[endIdx] = audioY[endIdx] * (1 - w) + audioY[startIdx] * w;
+        }
+      }
+    }
+    
+    function getAudioBasePos(phase) {
+      const TABLE_SIZE = audioX.length;
+      if (TABLE_SIZE === 0 || currentPath.length < 2) return { x: 0, y: 0 };
+      
+      if (pathIsClosed) {
+        let idx = phase * TABLE_SIZE;
+        let i = Math.floor(idx) % TABLE_SIZE;
+        let frac = idx - Math.floor(idx);
+        const ni = (i + 1) % TABLE_SIZE;
+        const x = audioX[i] * (1 - frac) + audioX[ni] * frac;
+        const y = audioY[i] * (1 - frac) + audioY[ni] * frac;
+        return { x, y };
+      }
+      
+      let idx = phase * (TABLE_SIZE - 1);
+      let i = Math.floor(idx);
+      let frac = idx - i;
+      if (i >= TABLE_SIZE - 1) return { x: audioX[TABLE_SIZE - 1], y: audioY[TABLE_SIZE - 1] };
+      const x = audioX[i] * (1 - frac) + audioX[i + 1] * frac;
+      const y = audioY[i] * (1 - frac) + audioY[i + 1] * frac;
+      return { x, y };
+    }
+    
+    function getAudioTransformedPos(phase) {
+      let p = getAudioBasePos(phase);
+      // Apply same live transforms as visual (scale, rotate, offset)
+      let x = p.x * scaleVal;
+      let y = p.y * scaleVal;
+      
+      // Combined rotation: static angle + continuous rotation from rotateFreq (using dedicated phase)
+      let totalRot = rotation + (audioRotatePhase * 2 * Math.PI);
+      if (totalRot !== 0) {
+        const c = Math.cos(totalRot);
+        const s = Math.sin(totalRot);
+        const xr = x * c - y * s;
+        const yr = x * s + y * c;
+        x = xr;
+        y = yr;
+      }
+      
+      x += offsetX;
+      y += offsetY;
+
+      // Linear master gain + hard safety clamp: what you draw is what you hear.
+      // Deliberately no tanh-style saturation — waveshaping would add harmonics
+      // the drawn curve doesn't have (a circle must stay a pure sine pair).
+      // The clamp only engages when scale/offset push past full scale.
+      x = Math.max(-1, Math.min(1, x * AUDIBLE_MASTER));
+      y = Math.max(-1, Math.min(1, y * AUDIBLE_MASTER));
+
+      return { x, y };
+    }
+    
+    function simplifyPath(points, tolerance = 0.004) {
+      if (points.length <= 2) return points;
+      const result = [points[0]];
+      for (let i = 1; i < points.length - 1; i++) {
+        const prev = result[result.length - 1];
+        const curr = points[i];
+        if (Math.hypot(curr.x - prev.x, curr.y - prev.y) > tolerance) {
+          result.push(curr);
+        }
+      }
+      result.push(points[points.length - 1]);
+      return result;
+    }
+    
+    function maybeAutoClosePath() {
+      if (!autoClose || currentPath.length < 3) return;
+      const first = currentPath[0];
+      const last = currentPath[currentPath.length - 1];
+      const dist = Math.hypot(first.x - last.x, first.y - last.y);
+      if (dist > 0.04) {  // threshold for "open"
+        currentPath.push({ x: first.x, y: first.y });  // close it
+      }
+    }
+
+    // ==================== SHAPE RECOGNITION & AUTODRAW ====================
+    function resamplePath(path, N, closed) {
+      if (path.length < 2) return path.slice();
+      const numSegs = closed ? path.length : path.length - 1;
+      let totalLen = 0;
+      const segLens = [];
+      for (let i = 0; i < numSegs; i++) {
+        const ni = closed ? (i + 1) % path.length : i + 1;
+        const d = Math.hypot(path[ni].x - path[i].x, path[ni].y - path[i].y);
+        segLens.push(d); totalLen += d;
+      }
+      if (totalLen === 0) return [path[0]];
+      const result = [];
+      let acc = 0, segIdx = 0;
+      for (let i = 0; i < N; i++) {
+        const target = closed ? i * totalLen / N : i * totalLen / (N - 1);
+        while (segIdx < numSegs - 1 && acc + segLens[segIdx] < target) { acc += segLens[segIdx]; segIdx++; }
+        const frac = segLens[segIdx] > 0 ? (target - acc) / segLens[segIdx] : 0;
+        const s = path[segIdx];
+        const e = closed ? path[(segIdx + 1) % path.length] : (path[segIdx + 1] || path[segIdx]);
+        result.push({ x: s.x + (e.x - s.x) * frac, y: s.y + (e.y - s.y) * frac });
+      }
+      return result;
+    }
+
+    function generatePerfectShape(shapeName) { // shape generator
+      const samples = 256;
+      let path = [];
+      switch(shapeName) {
+        case 'circle': { const r=0.85; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.cos(t)*r,y:Math.sin(t)*r});} break; }
+        case 'ellipse': { const rx=0.9,ry=0.6; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.cos(t)*rx,y:Math.sin(t)*ry});} break; }
+        case 'ellipse2x1': { const rx=0.92,ry=0.46; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.cos(t)*rx,y:Math.sin(t)*ry});} break; }
+        case 'ellipse3x1': { const rx=0.95,ry=0.32; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.cos(t)*rx,y:Math.sin(t)*ry});} break; }
+        case 'tallEllipse': { const rx=0.45,ry=0.9; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.cos(t)*rx,y:Math.sin(t)*ry});} break; }
+        case 'square': { const s=0.8; path=[{x:-s,y:-s},{x:s,y:-s},{x:s,y:s},{x:-s,y:s},{x:-s,y:-s}]; break; }
+        case 'rectangle': { const w=0.9,h=0.55; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'rectangle2x1': { const w=0.92,h=0.46; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'rectangle3x1': { const w=0.95,h=0.32; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'rectangle4x1': { const w=0.96,h=0.24; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'tallRectangle': { const w=0.45,h=0.9; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'tallRectangle2x1': { const w=0.32,h=0.95; path=[{x:-w,y:-h},{x:w,y:-h},{x:w,y:h},{x:-w,y:h},{x:-w,y:-h}]; break; }
+        case 'triangle': { const s=0.85; path=[{x:0,y:-s},{x:s,y:s*0.7},{x:-s,y:s*0.7},{x:0,y:-s}]; break; }
+        case 'pentagon': { const r=0.85; for(let i=0;i<5;i++){const a=-Math.PI/2+(i/5)*Math.PI*2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'hexagon': { const r=0.85; for(let i=0;i<6;i++){const a=-Math.PI/2+(i/6)*Math.PI*2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'octagon': { const r=0.82; for(let i=0;i<8;i++){const a=-Math.PI/2+(i/8)*Math.PI*2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'star': { const r1=0.85,r2=0.38; for(let i=0;i<10;i++){const a=-Math.PI/2+(i/10)*Math.PI*2; const r=(i%2===0)?r1:r2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'rhombus': { const w=0.85,h=0.55; path=[{x:0,y:-h},{x:w,y:0},{x:0,y:h},{x:-w,y:0},{x:0,y:-h}]; break; }
+        case 'semicircle': { const r=0.85; const n=samples/2; for(let i=0;i<=n;i++){const t=(i/n)*Math.PI; path.push({x:Math.cos(t)*r,y:Math.sin(t)*r});} path.push({x:-r,y:0}); break; }
+        case 'heart': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const x=16*Math.sin(t)**3; const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t); path.push({x:x/17*0.85,y:y/17*0.85});} break; }
+        case 'arrow': { path=[{x:-0.8,y:0},{x:0.3,y:0},{x:0.3,y:-0.35},{x:0.85,y:0},{x:0.3,y:0.35},{x:0.3,y:0},{x:-0.8,y:0}]; break; }
+        case 'figure8': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*4; path.push({x:Math.sin(t)*0.8,y:Math.sin(t*2)*0.55});} break; }
+        case 'line': { path=[{x:-0.85,y:0},{x:0.85,y:0}]; break; }
+        case 'crescent': { const R=0.82,r2=0.72,d=0.25; const ix=(R*R-r2*r2+d*d)/(2*d); const iy=Math.sqrt(Math.max(0.001,R*R-ix*ix)); const a1=Math.atan2(iy,ix),a2=Math.atan2(-iy,ix); const b1=Math.atan2(iy,ix-d),b2=Math.atan2(-iy,ix-d); const sw1=(a2<a1?a2+2*Math.PI:a2)-a1; const n1=100; for(let i=0;i<=n1;i++){const t=a1+(i/n1)*sw1; path.push({x:R*Math.cos(t),y:R*Math.sin(t)});} const sw2=b2-(b1<b2?b1:b1-2*Math.PI); const n2=80; for(let i=0;i<=n2;i++){const t=b2-(i/n2)*sw2; path.push({x:r2*Math.cos(t)+d,y:r2*Math.sin(t)});} break; }
+        case 'sine': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*4; path.push({x:(i/(samples-1))*1.7-0.85,y:Math.sin(t)*0.5});} break; }
+        case 'parabola': { for(let i=0;i<samples;i++){const x=(i/(samples-1))*1.7-0.85; path.push({x,y:0.9*x*x-0.4});} break; }
+        case 'spiral': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*6; const r=0.12+t/(Math.PI*6)*0.75; path.push({x:Math.cos(t)*r,y:Math.sin(t)*r});} break; }
+        case 'plus': { const a=0.8,b=0.22; path=[{x:0,y:-a},{x:0,y:-b},{x:b,y:-b},{x:b,y:b},{x:0,y:b},{x:0,y:a},{x:-b,y:a},{x:-b,y:b},{x:-a,y:b},{x:-a,y:-b},{x:-b,y:-b},{x:-b,y:-a},{x:0,y:-a}]; break; }
+        case 'infinity': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const s=Math.sin(t); path.push({x:0.85*s/(1+s*s),y:0.55*s*Math.cos(t)/(1+s*s)});} break; }
+        case 'checkmark': { path=[{x:-0.7,y:0.3},{x:-0.2,y:-0.3},{x:0.75,y:0.55}]; break; }
+        case 'lightning': { path=[{x:0.2,y:-0.85},{x:-0.25,y:-0.1},{x:0.1,y:-0.1},{x:-0.2,y:0.85},{x:0.3,y:0.05},{x:-0.05,y:0.05},{x:0.35,y:-0.45},{x:0.05,y:-0.45}]; break; }
+        case 'wave': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*6; path.push({x:(i/(samples-1))*1.7-0.85,y:Math.sin(t)*0.4+Math.sin(t*2.5)*0.15});} break; }
+        case 'diamond': { const w=0.55,h=0.8; path=[{x:0,y:-h},{x:w,y:0},{x:0,y:h},{x:-w,y:0},{x:0,y:-h}]; break; }
+        case 'trefoil': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(t*3)*0.6*Math.cos(t*0.5),y:Math.cos(t*3)*0.6*Math.sin(t*0.5)});} break; }
+        case 'questionmark': { const n=40; for(let i=0;i<n;i++){const t=Math.PI+(i/(n-1))*Math.PI*1.3; path.push({x:Math.cos(t)*0.4+0.05,y:Math.sin(t)*0.4+0.3});} path.push({x:0.05,y:-0.3}); path.push({x:0.05,y:-0.45}); break; }
+        case 'cross': { const a=0.75,b=0.15; path=[{x:0,y:-a},{x:b,y:-a},{x:b,y:-b},{x:a,y:-b},{x:a,y:b},{x:b,y:b},{x:b,y:a},{x:-b,y:a},{x:-b,y:b},{x:-a,y:b},{x:-a,y:-b},{x:-b,y:-b},{x:-b,y:-a},{x:0,y:-a}]; break; }
+        case 'lissajous12': { const a=1,b=2,dl=Math.PI/2; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(a*t+dl)*0.8,y:Math.sin(b*t)*0.8});} break; }
+        case 'lissajous23': { const a=2,b=3,dl=Math.PI/2; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(a*t+dl)*0.8,y:Math.sin(b*t)*0.8});} break; }
+        case 'lissajous35': { const a=3,b=5,dl=Math.PI/2; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(a*t+dl)*0.8,y:Math.sin(b*t)*0.8});} break; }
+        case 'lissajous45': { const a=4,b=5,dl=Math.PI/2; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(a*t+dl)*0.8,y:Math.sin(b*t)*0.8});} break; }
+        case 'lissajous34': { const a=3,b=4,dl=Math.PI/2; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(a*t+dl)*0.8,y:Math.sin(b*t)*0.8});} break; }
+        case 'rose3': { const k=3; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=Math.abs(Math.cos(k*t))*0.8; path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+        case 'rose4': { const k=4; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=Math.abs(Math.cos(k*t))*0.8; path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+        case 'rose5': { const k=5; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=Math.abs(Math.cos(k*t))*0.8; path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+        case 'rose8': { const k=8; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=Math.abs(Math.cos(k*t))*0.8; path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+        case 'house': { path=[{x:-0.6,y:0.5},{x:-0.6,y:-0.15},{x:0,y:-0.75},{x:0.6,y:-0.15},{x:0.6,y:0.5},{x:-0.6,y:0.5}]; break; }
+        case 'trapezoid': { const w1=0.9,w2=0.5,h=0.55; path=[{x:-w1,y:-h},{x:w1,y:-h},{x:w2,y:h},{x:-w2,y:h},{x:-w1,y:-h}]; break; }
+        case 'egg': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.8*(1+0.18*Math.cos(t)); path.push({x:r*Math.sin(t)*0.7,y:r*Math.cos(t)*0.95});} break; }
+        case 'sunburst': { const r1=0.85,r2=0.48; for(let i=0;i<16;i++){const a=(i/16)*Math.PI*2; const r=(i%2===0)?r1:r2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'cloud': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.55+0.18*Math.sin(t*3)+0.08*Math.cos(t*5); path.push({x:r*Math.cos(t)*0.85,y:r*Math.sin(t)*0.6});} break; }
+        case 'shield': { path=[{x:0,y:-0.85},{x:0.7,y:-0.55},{x:0.7,y:0.1},{x:0,y:0.85},{x:-0.7,y:0.1},{x:-0.7,y:-0.55},{x:0,y:-0.85}]; break; }
+        case 'crown': { path=[{x:-0.75,y:0.35},{x:-0.75,y:-0.25},{x:-0.5,y:-0.65},{x:-0.25,y:-0.25},{x:0,y:-0.75},{x:0.25,y:-0.25},{x:0.5,y:-0.65},{x:0.75,y:-0.25},{x:0.75,y:0.35},{x:-0.75,y:0.35}]; break; }
+        case 'stickfigure': { const hr=0.14; for(let i=0;i<40;i++){const t=(i/40)*Math.PI*2; path.push({x:hr*Math.cos(t),y:0.72+hr*Math.sin(t)});} path.push({x:0,y:0.58},{x:0,y:-0.05},{x:-0.4,y:0.35},{x:0.4,y:0.35},{x:0,y:-0.05},{x:-0.35,y:-0.75},{x:0,y:-0.05},{x:0.35,y:-0.75}); break; }
+        case 'ankh': { const hr=0.22; for(let i=0;i<40;i++){const t=(i/40)*Math.PI*2; path.push({x:hr*Math.cos(t),y:0.62+hr*Math.sin(t)});} path.push({x:-0.3,y:0.4},{x:0.3,y:0.4},{x:0,y:0.4},{x:0,y:-0.8}); break; }
+        case 'gear': { const r1=0.82,r2=0.65,teeth=10; for(let i=0;i<teeth*4;i++){const a=(i/(teeth*4))*Math.PI*2; const phase=Math.floor(i/2)%2; const r=phase===0?r1:r2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'fish': { const r=0.4; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const body=1+0.3*Math.cos(t); path.push({x:r*Math.sin(t)*0.95,y:r*Math.cos(t)*0.7*body});} path.push({x:0.45,y:0},{x:0.8,y:0.35},{x:0.8,y:-0.35},{x:0.45,y:0}); break; }
+        case 'chevron': { path=[{x:-0.8,y:0.5},{x:0,y:-0.5},{x:0.8,y:0.5}]; break; }
+        case 'zigzag': { const n=5; for(let i=0;i<=n;i++){path.push({x:(i/n)*1.7-0.85,y:(i%2===0)?0.4:-0.4});} break; }
+        case 'squarewave': { path=[{x:-0.85,y:0.4},{x:-0.5,y:0.4},{x:-0.5,y:-0.4},{x:-0.15,y:-0.4},{x:-0.15,y:0.4},{x:0.2,y:0.4},{x:0.2,y:-0.4},{x:0.55,y:-0.4},{x:0.55,y:0.4},{x:0.85,y:0.4}]; break; }
+        case 'sigmoid': { for(let i=0;i<samples;i++){const t=(i/(samples-1))*2-1; path.push({x:t*0.85,y:(1/(1+Math.exp(-t*5)))*0.8-0.4});} break; }
+        case 'exclamation': { path=[{x:0,y:0.85},{x:0,y:0.15},{x:0,y:0.05},{x:0,y:-0.1}]; break; }
+        case 'squareroot': { path=[{x:0.65,y:0.3},{x:0.3,y:0.3},{x:0.1,y:0.6},{x:-0.15,y:-0.75},{x:0.55,y:-0.35},{x:0.8,y:-0.35}]; break; }
+        case 'approx': { for(let i=0;i<samples;i++){const x=(i/(samples-1))*1.5-0.75; path.push({x,y:0.12*Math.sin(x*8)+0.2});} for(let i=samples-1;i>=0;i--){const x=(i/(samples-1))*1.5-0.75; path.push({x,y:0.12*Math.sin(x*8)-0.2});} break; }
+        case 'pisymbol': { path=[{x:-0.6,y:0.5},{x:0.6,y:0.5},{x:0.35,y:0.5},{x:0.35,y:-0.15},{x:0.2,y:-0.6},{x:0.05,y:-0.15},{x:0.05,y:0.5},{x:-0.05,y:0.5},{x:-0.05,y:-0.15},{x:-0.2,y:-0.6},{x:-0.35,y:-0.15},{x:-0.35,y:0.5},{x:-0.6,y:0.5}]; break; }
+        case 'sigmasym': { path=[{x:0.6,y:0.6},{x:-0.6,y:0.6},{x:0.1,y:0},{x:-0.6,y:-0.6},{x:0.6,y:-0.6}]; break; }
+        case 'omegasym': { const r=0.3,n=40; for(let i=0;i<n;i++){const t=Math.PI*0.15+(i/(n-1))*Math.PI*0.7; path.push({x:r*Math.cos(t)+r,y:r*Math.sin(t)+0.3});} for(let i=n-1;i>=0;i--){const t=Math.PI*0.15+(i/(n-1))*Math.PI*0.7; path.push({x:-(r*Math.cos(t)+r),y:r*Math.sin(t)+0.3});} path.push({x:-0.5,y:0.1},{x:-0.35,y:-0.5},{x:-0.15,y:-0.3},{x:0.15,y:-0.3},{x:0.35,y:-0.5},{x:0.5,y:0.1},{x:0.3,y:0.3}); break; }
+        case 'oceanwave': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*8; const env=Math.sin((i/samples)*Math.PI); path.push({x:(i/(samples-1))*1.7-0.85,y:(Math.sin(t)*0.35+Math.sin(t*2.3)*0.12)*env});} break; }
+        case 'spiralSquare': { let s=0.1; let x=0,y=0; path.push({x,y}); for(let t=0;t<4*4;t++){const dir=t%4; const len=s*(1+Math.floor(t/4)*0.15); if(dir===0){x+=len;}else if(dir===1){y+=len;}else if(dir===2){x-=len;}else{y-=len;} path.push({x:Math.max(-0.85,Math.min(0.85,x)),y:Math.max(-0.85,Math.min(0.85,y))});} break; }
+        case 'spiralTri': { let s=0.12; let x=0,y=0; path.push({x,y}); for(let t=0;t<3*5;t++){const dir=t%3; const len=s*(1+Math.floor(t/3)*0.18); if(dir===0){x+=len;}else if(dir===1){const a=-2*Math.PI/3; x+=len*Math.cos(a);y+=len*Math.sin(a);}else{const a=2*Math.PI/3; x+=len*Math.cos(a);y+=len*Math.sin(a);} path.push({x:Math.max(-0.85,Math.min(0.85,x)),y:Math.max(-0.85,Math.min(0.85,y))});} break; }
+        case 'squiggle': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*12; path.push({x:(i/(samples-1))*1.7-0.85,y:Math.sin(t)*0.25});} break; }
+        case 'spiralLog': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*8; const r=0.08*Math.pow(1.02,t); path.push({x:Math.cos(t)*r,y:Math.sin(t)*r});} break; }
+        case 'mushroom': { const r=0.6; for(let i=0;i<60;i++){const t=Math.PI+(i/59)*Math.PI; path.push({x:r*Math.cos(t),y:r*Math.sin(t)*0.7+0.2});} path.push({x:0.25,y:0.2},{x:0.25,y:-0.6},{x:-0.25,y:-0.6},{x:-0.25,y:0.2}); break; }
+        case 'notesign': { const r=0.18; for(let i=0;i<40;i++){const t=(i/40)*Math.PI*2; path.push({x:-0.2+r*Math.cos(t),y:-0.4+r*Math.sin(t)*0.7});} path.push({x:-0.05,y:-0.35},{x:-0.05,y:0.6},{x:0.5,y:0.75},{x:0.5,y:-0.25},{x:-0.05,y:-0.35}); break; }
+        case 'yinyang': { const r=0.82; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} const sr=r/2; for(let i=0;i<60;i++){const t=Math.PI/2+(i/59)*Math.PI; path.push({x:sr*Math.cos(t),y:sr*Math.sin(t)});} for(let i=0;i<60;i++){const t=-Math.PI/2+(i/59)*Math.PI; path.push({x:sr*Math.cos(t),y:sr*Math.sin(t)}); path.push;} break; }
+        case 'hypo': { const R1=0.7,r1=0.22; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*10; const r=R1-r1*t/(Math.PI*10); path.push({x:(R1-r)*Math.cos(t),y:(R1-r)*Math.sin(t)});} break; }
+        case 'astroid': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:0.85*Math.cos(t)**3,y:0.85*Math.sin(t)**3});} break; }
+        case 'cardioid': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.42*(1-Math.cos(t)); path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+        case 'deltoid': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:0.3*(2*Math.cos(t)+Math.cos(2*t)),y:0.3*(2*Math.sin(t)-Math.sin(2*t))});} break; }
+        case 'gearheart': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(t)**3*0.85,y:(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16*0.85});} break; }
+        case 'bean': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.7+0.15*Math.sin(t*2); path.push({x:r*Math.cos(t)*0.85,y:r*Math.sin(t)*0.8});} break; }
+        case 'starburst2': { const r1=0.85,r2=0.3,n=12; for(let i=0;i<n*2;i++){const a=(i/(n*2))*Math.PI*2; const r=(i%2===0)?r1:r2; path.push({x:Math.cos(a)*r,y:Math.sin(a)*r});} path.push({...path[0]}); break; }
+        case 'flower': { const petals=6; for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.5+0.3*Math.abs(Math.sin(petals*t/2)); path.push({x:r*Math.cos(t)*0.85,y:r*Math.sin(t)*0.85});} break; }
+        case 'pretzel': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:Math.sin(2*t)*0.8,y:Math.sin(3*t)*0.55});} break; }
+        case 'lemniscate': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const s=Math.sin(t); path.push({x:0.9*s/(1+s*s),y:0.55*s*Math.cos(t)/(1+s*s)});} break; }
+        case 'trefoil2d': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:(Math.sin(t)+2*Math.sin(2*t))*0.28,y:(Math.cos(t)-2*Math.cos(2*t))*0.28});} break; }
+        case 'hypocycloid4': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:0.85*(Math.cos(t)+0.25*Math.cos(3*t)),y:0.85*(Math.sin(t)-0.25*Math.sin(3*t))});} break; }
+        case 'epicycloid3': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; path.push({x:0.45*(4*Math.cos(t)-Math.cos(4*t)),y:0.45*(4*Math.sin(t)-Math.sin(4*t))});} break; }
+        case 'butterfly': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*12; path.push({x:Math.sin(t)*(Math.exp(Math.cos(t))-2*Math.cos(4*t)-Math.sin(t/12)**5)*0.3,y:Math.cos(t)*(Math.exp(Math.cos(t))-2*Math.cos(4*t)-Math.sin(t/12)**5)*0.3});} break; }
+        case 'limacon': { for(let i=0;i<samples;i++){const t=(i/samples)*Math.PI*2; const r=0.3+0.6*Math.cos(t); path.push({x:r*Math.cos(t),y:r*Math.sin(t)});} break; }
+      }
+      return path;
+    }
+
+    function recognizeShape(path) {
+      if (path.length < 3) return [];
+      const N = 64;
+      const pts = resamplePath(path, N);
+      let cx=0, cy=0;
+      pts.forEach(p=>{cx+=p.x;cy+=p.y;}); cx/=N; cy/=N;
+      let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+      pts.forEach(p=>{minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);});
+      const bw=Math.max(maxX-minX,0.001), bh=Math.max(maxY-minY,0.001);
+      const aspect=Math.max(bw,bh)/Math.min(bw,bh);
+      const orient=bw/bh;
+      const startEndDist=Math.hypot(pts[0].x-pts[N-1].x,pts[0].y-pts[N-1].y);
+      const diagLen=Math.hypot(bw,bh);
+      const isClosed=startEndDist<diagLen*0.22;
+      const radii=pts.map(p=>Math.hypot(p.x-cx,p.y-cy));
+      const meanR=radii.reduce((a,b)=>a+b,0)/N;
+      const cvR=Math.sqrt(radii.reduce((a,b)=>a+(b-meanR)**2,0)/N)/(meanR||0.001);
+      let pathLen=0; for(let i=0;i<N-1;i++) pathLen+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y);
+      const straightness=startEndDist/(pathLen||0.001);
+      // Corner detection via turn angles (robust for hand-drawn polygons)
+      const cornerThresh = 0.5;
+      const stepSz = Math.max(1, Math.floor(N / 32));
+      const minCornerSp = Math.max(2, Math.floor(N / 20));
+      let nCorners = 0;
+      let firstCorner = -100, lastCorner = -100;
+      for (let i = 0; i < N; i++) {
+        let i0, i2;
+        if (isClosed) { i0 = ((i - stepSz) % N + N) % N; i2 = (i + stepSz) % N; }
+        else { i0 = i - stepSz; i2 = i + stepSz; if (i0 < 0 || i2 >= N) continue; }
+        const a1 = Math.atan2(pts[i].y - pts[i0].y, pts[i].x - pts[i0].x);
+        const a2 = Math.atan2(pts[i2].y - pts[i].y, pts[i2].x - pts[i].x);
+        let da = a2 - a1;
+        if (da > Math.PI) da -= 2*Math.PI;
+        if (da < -Math.PI) da += 2*Math.PI;
+        if (Math.abs(da) > cornerThresh && (i - lastCorner > minCornerSp || lastCorner < 0)) {
+          if (firstCorner < 0) firstCorner = i;
+          nCorners++;
+          lastCorner = i;
+        }
+      }
+      // For closed paths, merge first & last corner if they're the same physical corner (wrap-around)
+      if (isClosed && nCorners >= 2 && firstCorner >= 0 && (firstCorner - lastCorner + N) % N < minCornerSp) nCorners--;
+      // Convexity
+      let signChanges=0,prevSign=0;
+      for(let i=0;i<N;i++){const p0=pts[i],p1=pts[(i+1)%N],p2=pts[(i+2)%N];const cr=(p1.x-p0.x)*(p2.y-p1.y)-(p1.y-p0.y)*(p2.x-p1.x);const sg=cr>0.0001?1:(cr<-0.0001?-1:0);if(sg&&prevSign&&sg!==prevSign)signChanges++;if(sg)prevSign=sg;}
+      const convex=signChanges<3;
+      // Total angular sweep around centroid
+      let totalAngle=0;
+      for(let i=0;i<N;i++){const a1=Math.atan2(pts[i].y-cy,pts[i].x-cx);const a2=Math.atan2(pts[(i+1)%N].y-cy,pts[(i+1)%N].x-cx);let da=a2-a1;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;totalAngle+=da;}
+      const selfIntersect_raw=Math.abs(totalAngle)<Math.PI*0.5;
+      // Star: alternating radii
+      let starScore=0;
+      if(isClosed&&nCorners>=8){const hm=radii.map(r=>r>meanR?1:0);let alt=0;for(let i=1;i<hm.length;i++)if(hm[i]!==hm[i-1])alt++;starScore=Math.min(1,alt/10);}
+      // Zero crossings (for sine/wave detection) — how many times path crosses horizontal midline
+      let zeroCross=0;
+      const midY=(minY+maxY)/2;
+      for(let i=0;i<N-1;i++){if((pts[i].y<midY)!==(pts[i+1].y<midY))zeroCross++;}
+      // Turning points (local extrema in Y) — for parabola, sine, etc.
+      let yExtrema=0;
+      for(let i=1;i<N-1;i++){if((pts[i].y>pts[i-1].y&&pts[i].y>=pts[i+1].y)||(pts[i].y<pts[i-1].y&&pts[i].y<=pts[i+1].y))yExtrema++;}
+      // Sharp turn detection (for checkmark, lightning)
+      let sharpTurns=0;
+      let lastSharpIdx=-10;
+      for(let i=3;i<N-3;i++){const p0=pts[i-3],p1=pts[i],p2=pts[i+3];const a1=Math.atan2(p1.y-p0.y,p1.x-p0.x);const a2=Math.atan2(p2.y-p1.y,p2.x-p1.x);let da=Math.abs(a2-a1);if(da>Math.PI)da=2*Math.PI-da;if(da>Math.PI*0.42&&i-lastSharpIdx>=3){sharpTurns++;lastSharpIdx=i;}}
+      // Monotonic radius (spiral detection)
+      let rMonotonic=0;
+      for(let i=1;i<N;i++){if(radii[i]>radii[i-1])rMonotonic++;else rMonotonic--;}
+      rMonotonic=Math.abs(rMonotonic)/N;
+      // Radius range (spiral: high range, crescent: moderate)
+      const rRange=(Math.max(...radii)-Math.min(...radii))/(meanR||0.001);
+      // Centroid offset from bbox center (crescent detection)
+      const bboxCX=(minX+maxX)/2, bboxCY=(minY+maxY)/2;
+      const centroidOffset=Math.hypot(cx-bboxCX,cy-bboxCY)/diagLen;
+      // 4-fold symmetry (plus/cross detection)
+      let sym4=0;
+      for(let i=0;i<N;i++){const p=pts[i];const rp={x:-p.y,y:p.x};let bestD=Infinity;for(let j=0;j<N;j++){const d=Math.hypot(pts[j].x-rp.x+cx,pts[j].y-rp.y+cy);if(d<bestD)bestD=d;}sym4+=bestD;}
+      sym4=1-sym4/N/(meanR||0.001);
+      // Convex hull ratio (concavity measure for crescent)
+      let hullArea=0;
+      const hullPts=[];
+      for(let i=0;i<N;i++){while(hullPts.length>=2){const a=hullPts[hullPts.length-2],b=hullPts[hullPts.length-1];const cr=(b.x-a.x)*(pts[i].y-a.y)-(b.y-a.y)*(pts[i].x-a.x);if(cr<=0)hullPts.pop();else break;}hullPts.push(pts[i]);}
+      for(let i=0;i<hullPts.length;i++){const j=(i+1)%hullPts.length;hullArea+=hullPts[i].x*hullPts[j].y-hullPts[j].x*hullPts[i].y;}
+      hullArea=Math.abs(hullArea)/2;
+      const pathArea=0;
+      let pArea=0;
+      for(let i=0;i<N;i++){const j=(i+1)%N;pArea+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;}
+      pArea=Math.abs(pArea)/2;
+      const concavity=hullArea>0?1-pArea/hullArea:0;
+      // Smoothness (low corner count + low sharp turns)
+      const smoothness=Math.max(0,1-nCorners/8)*(1-Math.min(1,sharpTurns/5));
+      const cands=[];
+      function add(name,shape,icon,score){if(score>0.03)cands.push({name,shape,icon,score});}
+      // X-direction changes (for zigzag/square wave detection)
+      let xDir=0,xExtrema=0;
+      for(let i=1;i<N-1;i++){const d1=pts[i].x-pts[i-1].x,d2=pts[i+1].x-pts[i].x; if((d1>0&&d2<0)||(d1<0&&d2>0))xExtrema++;}
+      // Self-intersection count (segment crossing + near-coincident non-adjacent points)
+      let crossings=[];
+      const segEnd = isClosed ? N : N - 1;
+      for(let i=0;i<segEnd;i++){for(let j=i+3;j<segEnd;j++){const a1=pts[i],a2=pts[(i+1)%N],b1=pts[j],b2=pts[(j+1)%N];const d=(a2.x-a1.x)*(b2.y-b1.y)-(a2.y-a1.y)*(b2.x-b1.x);if(Math.abs(d)>0.001){const t=((b1.x-a1.x)*(b2.y-b1.y)-(b1.y-a1.y)*(b2.x-b1.x))/d;const u=((b1.x-a1.x)*(a2.y-a1.y)-(b1.y-a1.y)*(a2.x-a1.x))/d;if(t>0.01&&t<0.99&&u>0.01&&u<0.99){const ix=a1.x+(a2.x-a1.x)*t,iy=a1.y+(a2.y-a1.y)*t;let dup=false;for(const c of crossings){if(Math.hypot(c.x-ix,c.y-iy)<0.08){dup=true;break;}}if(!dup)crossings.push({x:ix,y:iy});}}}}
+      // Also detect near-coincident non-adjacent points (catches limacon-style loops through origin)
+      for(let i=0;i<N;i++){for(let j=i+8;j<N;j++){const circDist=isClosed?Math.min(j-i,N-j+i):j-i;if(circDist<8)continue;if(Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y)<0.02){let dup=false;for(const c of crossings){if(Math.hypot(c.x-pts[i].x,c.y-pts[i].y)<0.08){dup=true;break;}}if(!dup)crossings.push({x:pts[i].x,y:pts[i].y});}}}
+      const crossCount=crossings.length;
+      // Number of "petals" via sign changes in radius (smooth shapes only)
+      let petalScore=Math.min(1,crossCount/4);
+      const selfIntersect=selfIntersect_raw||crossCount>0;
+      const polyPenalty=selfIntersect?0.05:1;
+      // cvR-based shape class: smooth closed curves with radius variation are cardioid/limacon/bean, not circles
+      const isRadialCurve = isClosed && cvR > 0.05 && nCorners <= 3 && smoothness > 0.3;
+      if(isClosed){
+        const ellipseSmooth = (nCorners <= 3 ? 1 : 0.3) * (sharpTurns <= 1 ? 1 : 0.15);
+        add('Circle','circle','⭕',polyPenalty*Math.max((1-cvR*3)*(aspect<1.3?1:0.5)*(nCorners<=2?1:0.3),(cvR<0.04&&nCorners<=1)?0.85:0)*(aspect<1.3?1:0.4)*(isRadialCurve?0.3:1));
+        add('Ellipse','ellipse','🔵',polyPenalty*ellipseSmooth*(aspect>=1.15&&aspect<2.2?1:0.6)*(orient>=0.9?1:0.3));
+        add('Wide Ellipse','ellipse2x1','🔵',polyPenalty*ellipseSmooth*(aspect>=1.8&&aspect<3.5?1:0.2)*(orient>=1?1:0.1));
+        add('Wide Ellipse 3:1','ellipse3x1','🔵',polyPenalty*ellipseSmooth*(aspect>=3?1:0.1)*(orient>=1?1:0.05));
+        add('Tall Ellipse','tallEllipse','🔵',polyPenalty*ellipseSmooth*(aspect>=1.8&&aspect<3.5?1:0.2)*(orient<1?1:0.05));
+        const rectBase = polyPenalty*(nCorners===4?1:nCorners===5?0.8:nCorners===3?0.5:Math.max(0,1-Math.abs(nCorners-4)*0.5))*(convex?1:0.5);
+        add('Square','square','⬜',rectBase*(aspect<1.5?1:0.2)*(cvR<0.5?0.9:0.4));
+        add('Rectangle','rectangle','▭',rectBase*(aspect>=1.25&&aspect<2.2?1:0.5)*(orient>=0.9?1:0.2));
+        add('Wide Rectangle','rectangle2x1','▭',rectBase*(aspect>=1.8&&aspect<3.0?1:0.15)*(orient>=1?1:0.1));
+        add('Wide Rectangle 3:1','rectangle3x1','▭',rectBase*(aspect>=2.8&&aspect<4.5?1:0.12)*(orient>=1?1:0.05));
+        add('Wide Rectangle 4:1','rectangle4x1','▭',rectBase*(aspect>=3.8?1:0.1)*(orient>=1?1:0.03));
+        add('Tall Rectangle','tallRectangle','▯',rectBase*(aspect>=1.8&&aspect<3.0?1:0.15)*(orient<1?1:0.05));
+        add('Tall Rectangle 2:1','tallRectangle2x1','▯',rectBase*(aspect>=2.8?1:0.1)*(orient<1?1:0.03));
+        add('Triangle','triangle','🔺',polyPenalty*(nCorners===3?1:nCorners===2?0.7:Math.max(0,1-Math.abs(nCorners-3)*0.4))*(convex?1:0.5)*(cvR>0.03?1:0.4)*(smoothness<0.7?1:0.3));
+        add('Pentagon','pentagon','⬠',polyPenalty*(nCorners===5?1:Math.max(0,1-Math.abs(nCorners-5)*0.55))*(convex?1:0.6)*(smoothness<0.5?1:0.15)*(cvR>0.03?1:0.2)*(yExtrema>=4?0.2:1));
+        add('Hexagon','hexagon','⬡',polyPenalty*(nCorners===6?1:Math.max(0,1-Math.abs(nCorners-6)*0.55))*(convex?1:0.6)*(smoothness<0.45?1:0.15)*(cvR>0.02?1:0.2)*(yExtrema>=4?0.2:1));
+        add('Octagon','octagon','⬢',polyPenalty*(nCorners>=7?1:Math.max(0,1-Math.abs(nCorners-8)*0.55))*(convex?1:0.6)*(smoothness<0.4?1:0.15)*(cvR>0.08?1:0.2)*(yExtrema>=4?0.15:1));
+        add('Star','star','⭐',polyPenalty*starScore*(nCorners>=8?1:0.3)*(convex?0.3:1)*(yExtrema>=5?0.3:1));
+        add('Rhombus','rhombus','◆',polyPenalty*(nCorners>=3&&nCorners<=5?0.85:Math.max(0,1-Math.abs(nCorners-4)*0.45))*(cvR>0.15?1:0.4)*(convex?1:0.6)*(smoothness<0.55?1:0.2)*(aspect>1.3||aspect<0.77?1:0.4));
+        add('Diamond','diamond','💎',polyPenalty*(nCorners>=3&&nCorners<=5?0.85:Math.max(0,1-Math.abs(nCorners-4)*0.45))*(cvR>0.2?1:0.3)*(aspect>1.3?0.9:0.3)*(convex?1:0.5)*(smoothness<0.55?1:0.2));
+        add('Heart','heart','❤️',(concavity>0.02?0.8:0.2)*(nCorners>=2?0.7:0.2)*(smoothness>0.1?0.6:0.2)*(cvR>0.05?0.6:0.2));
+        add('Crescent','crescent','🌙',(concavity>0.2?1:0.2)*(convex?0.1:1)*(smoothness>0.4?0.8:0.3)*(centroidOffset>0.05?0.7:0.3)*(cvR<0.5?0.8:0.3));
+        add('Plus','plus','➕',sym4>0.6?(nCorners>=8?0.8:0.3)*(convex?0.2:1)*(yExtrema>=4?0.25:1):0.1);
+        add('Cross','cross','✚',sym4>0.6?(nCorners>=8?0.7:0.2)*(convex?0.2:1)*(yExtrema>=4?0.25:1):0.05);
+        if(selfIntersect)add('Figure 8','figure8','♾️',crossCount===1?(cvR>0.18?0.25:0.9):crossCount>=2?0.3:0.1);
+        if(selfIntersect)add('Infinity','infinity','♾️',crossCount===1&&smoothness>0.5?(cvR>0.22?0.2:0.75):0.2);
+        if(selfIntersect)add('Trefoil','trefoil','☘️',concavity>0.1?0.6:0.25);
+        if(selfIntersect)add('Pretzel','pretzel','🥨',crossCount===2?0.85:crossCount>=3&&crossCount<=6?0.7:crossCount===1?0.45:0.2);
+        if(selfIntersect)add('Lemniscate','lemniscate','♾️',crossCount===1&&smoothness>0.4?(cvR>0.22?0.2:0.7):0.2);
+        if(selfIntersect)add('Trefoil Knot','trefoil2d',' Celtic ',crossCount>=3&&smoothness>0.2?0.7:0.2);
+        add('Egg','egg','🥚',polyPenalty*(cvR>0.04?1:0.1)*(1-cvR*1.5)*(aspect>1.1&&aspect<1.6?0.8:0.2)*(nCorners<=3?0.8:0.3)*(centroidOffset>0.02?0.6:0.7));
+        add('Trapezoid','trapezoid','⏢',polyPenalty*(nCorners>=3&&nCorners<=5?0.75:Math.max(0,1-Math.abs(nCorners-4)*0.45))*(convex?0.8:0.3)*(aspect>1.1?0.7:0.3)*(smoothness<0.55?1:0.2)*(cvR>0.04?1:0.3));
+        add('House','house','🏠',(nCorners>=4&&nCorners<=7?0.7:0.2)*(convex?0.1:0.8)*(concavity>0.05?0.6:0.3));
+        add('Sunburst','sunburst','☀️',(nCorners>=10?0.8:0.25)*(convex?0.2:1)*(cvR>0.15?0.7:0.25));
+        add('Cloud','cloud','☁️',(concavity>0.05?0.6:0.2)*(convex?0.1:1)*(smoothness>0.3?0.6:0.2)*(nCorners>=4?0.5:0.2));
+        add('Shield','shield','🛡️',(nCorners>=4&&nCorners<=8?0.5:0.2)*(convex?0.2:0.7)*(concavity>0.03?0.5:0.2));
+        add('Crown','crown','👑',(nCorners>=5?0.6:0.2)*(convex?0.1:0.8)*(concavity>0.05?0.5:0.2));
+        add('Gear','gear','⚙️',(nCorners>=10?0.6:0.2)*(convex?0.3:1)*(cvR>0.1?0.5:0.2));
+        add('Fish','fish','🐟',(concavity>0.05?0.5:0.2)*(convex?0.2:0.7)*(aspect>1.3?0.6:0.3));
+        add('Mushroom','mushroom','🍄',(concavity>0.1?0.4:0.1)*(convex?0.1:0.7)*(nCorners>=3?0.4:0.1));
+        add('Ankh','ankh','☥',(selfIntersect?0.4:0.15)*(concavity>0.1?0.4:0.1));
+        add('Yin Yang','yinyang','☯️',(cvR<0.2&&crossCount>=2?0.65:0.15)*(smoothness>0.4?0.6:0.25));
+        add('Flower','flower','🌸',(crossCount>=4?0.75:0.25)*(smoothness>0.3?0.6:0.25)*(convex?0.2:1));
+        add('Starburst','starburst2','💥',(nCorners>=10?0.6:0.2)*(convex?0.2:1)*(cvR>0.2?0.6:0.25));
+        add('Omega','omegasym','Ω',(yExtrema>=2?0.85:yExtrema>=1?0.6:0.25)*(nCorners>=2?0.8:0.3)*(sharpTurns>=1?0.8:0.4)*(aspect>0.6&&aspect<2.5?0.85:0.2)*(straightness<0.6?0.8:0.3)*(cvR>0.04?0.85:0.9));
+        add('Bean','bean','🫘',(cvR>0.04?1:0.1)*(1-cvR*1.5)*(concavity>0.05?0.4:0.2)*(nCorners<=4?0.5:0.2));
+        add('Cardioid','cardioid','❤️',(cvR>0.03?0.95:0.35)*(nCorners<=5?0.85:0.2)*(smoothness>0.1?0.85:0.2)*(aspect<1.8?0.85:0.3)*(selfIntersect?0.75:1)*(centroidOffset>0.005?0.95:0.45)*(concavity>0.02?0.85:0.65));
+        add('Astroid','astroid','✦',(nCorners===4?0.6:0.08)*(cvR>0.2?0.6:0.25)*(convex?0.3:0.8));
+        add('Deltoid','deltoid','🔺',(crossCount>=2?0.55:0.05)*(nCorners<=4?0.4:0.15));
+        // Lissajous shapes
+        if(crossCount>=2){add('Lissajous 1:2','lissajous12','🔢',smoothness>0.3?0.85:0.1);}
+        if(crossCount>=3){add('Lissajous 2:3','lissajous23','🔢',smoothness>0.3?0.85:0.1);}
+        if(crossCount>=4){add('Lissajous 3:5','lissajous35','🔢',smoothness>0.2?0.75:0.1);}
+        if(crossCount>=4){add('Lissajous 4:5','lissajous45','🔢',smoothness>0.2?0.65:0.1);}
+        if(crossCount>=3){add('Lissajous 3:4','lissajous34','🔢',smoothness>0.3?0.65:0.1);}
+        // Rose curves
+        if(crossCount>=3){add('Rose 3-petal','rose3','🌹',smoothness>0.3?0.65:0.08);}
+        if(crossCount>=5){add('Rose 4-petal','rose4','🌹',smoothness>0.3?0.65:0.08);}
+        if(crossCount>=6){add('Rose 5-petal','rose5','🌹',smoothness>0.2?0.55:0.05);}
+        if(crossCount>=10){add('Rose 8-petal','rose8','🌼',smoothness>0.2?0.5:0.05);}
+        // Hypotrochoid
+        if(crossCount>=4){add('Spirograph','hypo','🌀',smoothness>0.3?0.55:0.05);}
+        add('Hypocycloid 4-cusp','hypocycloid4','✦',(crossCount>=2&&nCorners<=4&&cvR>0.15)?0.65:0.05);
+        add('Epicycloid 3-cusp','epicycloid3','🌿',(crossCount>=2&&smoothness>0.3)?0.6:0.05);
+        add('Butterfly','butterfly','🦋',(crossCount>=4&&smoothness>0.2)?0.6:0.05);
+        add('Limacon','limacon','🐚',(cvR>0.06?0.85:0.3)*(nCorners<=5?0.8:0.2)*(smoothness>0.1?0.7:0.2)*(selfIntersect?0.85:0.6)*(crossCount>=1?0.8:0.55)*(aspect<1.7?0.8:0.3));
+        add('Lissajous 3:2','lissajous34','🔢',(crossCount>=3&&smoothness>0.2)?0.6:0.05);
+      } else {
+        const sweep=Math.abs(totalAngle);
+        add('Semicircle','semicircle','◖',(sweep>Math.PI*0.6&&sweep<Math.PI*1.4?1:0.3)*(cvR<0.4?0.8:0.4)*(sharpTurns<1?0.8:0.3));
+        add('Line','line','▬',straightness>0.85?1:0.1);
+        add('Arrow','arrow','➡',0.35*(sharpTurns>=1?0.6:0.3)*(straightness<0.7?0.5:0.2));
+        add('Sine Wave','sine','〰️',(zeroCross>=3?1:Math.max(0,zeroCross/3*0.5))*(yExtrema>=2?0.8:0.2)*(smoothness>0.3?0.7:0.3)*(sharpTurns<2?0.8:0.3));
+        add('Wave','wave','🌊',(zeroCross>=4?1:0.3)*(yExtrema>=3?0.8:0.2)*(smoothness>0.2?0.6:0.2)*(sharpTurns<3?0.7:0.3));
+        add('Parabola','parabola','📈',(yExtrema===1?1:Math.max(0,1-Math.abs(yExtrema-1)*0.4))*(zeroCross<=1?0.8:0.3)*(smoothness>0.3?0.7:0.3)*(straightness<0.7?0.8:0.3)*(sharpTurns<1?0.8:0.25));
+        add('Spiral','spiral','🌀',(Math.abs(totalAngle)>Math.PI*2.5?1:0.2)*(rMonotonic>0.7?1:0.3)*(rRange>0.5?0.8:0.2));
+        add('Log Spiral','spiralLog','🌀',(Math.abs(totalAngle)>Math.PI*3?0.7:0.2)*(rMonotonic>0.7?0.8:0.2));
+        add('Square Spiral','spiralSquare','🌀',(Math.abs(totalAngle)>Math.PI*2?0.8:0.2)*(sharpTurns>=3?0.8:0.2)*(rMonotonic>0.5?0.7:0.2));
+        add('Triangular Spiral','spiralTri','🌀',(Math.abs(totalAngle)>Math.PI*2?0.7:0.2)*(sharpTurns>=3?0.7:0.2)*(rMonotonic>0.4?0.5:0.2));
+        add('Hypotrochoid','hypo','🌀',(Math.abs(totalAngle)>Math.PI*2?0.55:0.15)*(smoothness>0.2?0.5:0.2));
+        add('Checkmark','checkmark','✓',(sharpTurns===1?1:Math.max(0,1-Math.abs(sharpTurns-1)*0.3))*(straightness<0.7?0.8:0.3)*(yExtrema===1?0.6:0.3));
+        add('Lightning','lightning','⚡',(sharpTurns>=2?0.9:sharpTurns>=1?0.65:0.2)*(straightness<0.8?0.85:0.35)*(nCorners>=1?0.8:0.3)*(smoothness<0.4?0.85:0.35)*(sharpTurns>=4?0.9:0.65));
+        add('Question Mark','questionmark','❓',(yExtrema>=1?0.6:0.15)*(sharpTurns>=1?0.5:0.15)*(startEndDist>0.3?0.5:0.15));
+        add('Chevron','chevron','⌄',(sharpTurns===1?1:Math.max(0,1-Math.abs(sharpTurns-1)*0.3))*(straightness<0.8?0.7:0.2)*(yExtrema===1?0.6:0.3)*(zeroCross<=1?0.7:0.3));
+        add('Zigzag','zigzag','⚡',(sharpTurns>=3&&sharpTurns<=5?0.95:sharpTurns>5?0.5:0.2)*(yExtrema>=2?0.8:0.25)*(straightness<0.7?0.8:0.25)*(smoothness<0.3?0.7:0.25)*(nCorners<=6?1:0.5));
+        add('Square Wave','squarewave','⌗',(sharpTurns>=3&&sharpTurns<=6?0.9:sharpTurns>6?0.4:0.2)*(xExtrema>=2?0.8:0.25)*(zeroCross>=2?0.7:0.25)*(smoothness<0.2?0.7:0.25));
+        add('Sigmoid','sigmoid','∫',(yExtrema<=1?0.8:0.2)*(zeroCross<=1?0.6:0.2)*(smoothness>0.3?0.6:0.2)*(straightness<0.8?0.5:0.2)*(sharpTurns<2?0.7:0.2));
+        add('Exclamation','exclamation','❗',(straightness>0.7?0.5:0.1)*(sharpTurns<1?0.5:0.1)*(zeroCross===0?0.4:0.1));
+        add('Squiggle','squiggle','〰️',(zeroCross>=5?0.8:0.25)*(yExtrema>=4?0.7:0.25)*(smoothness>0.3?0.6:0.25)*(sharpTurns<2?0.7:0.25));
+        add('Ocean Wave','oceanwave','🌊',(zeroCross>=3?0.8:0.3)*(yExtrema>=2?0.6:0.2)*(smoothness>0.2?0.6:0.2)*(Math.abs(pathLen)>0.5?0.6:0.2)*(sharpTurns<2?0.7:0.2));
+        add('Approx','approx','≈',(zeroCross>=4?0.7:0.3)*(smoothness>0.3?0.6:0.25)*(sharpTurns<2?0.7:0.25)*(straightness<0.7?0.5:0.25));
+        add('Pi Symbol','pisymbol','π',(sharpTurns>=1?0.5:0.15)*(yExtrema<=2?0.5:0.15));
+        add('Sigma','sigmasym','Σ',(sharpTurns>=2?0.5:0.15)*(yExtrema<=1?0.5:0.15));
+        add('Omega','omegasym','Ω',(yExtrema>=2?0.92:yExtrema>=1?0.7:0.25)*(sharpTurns>=1?0.88:0.35)*(nCorners>=2?0.82:0.3)*(aspect>0.5&&aspect<3?0.88:0.2)*(straightness<0.8?0.88:0.25)*(cvR>0.04?0.82:1));
+        add('Square Root','squareroot','√',(sharpTurns>=1?0.5:0.15)*(yExtrema<=2?0.5:0.15));
+        add('Note','notesign','♪',(concavity>0.05?0.4:0.15)*(smoothness>0.2?0.4:0.15));
+        add('Triangle','triangle','🔺',(nCorners>=1&&nCorners<=4?0.85:0.2)*(cvR>0.03?0.8:0.4)*(yExtrema<=3?0.85:0.3)*(straightness<0.65?0.85:0.4)*(sharpTurns>=1?0.8:0.4));
+        add('Square','square','⬜',(nCorners>=2&&nCorners<=5?0.85:0.15)*(aspect<1.5?0.85:0.3)*(cvR>0.03?0.7:0.35)*(yExtrema<=3?0.85:0.3)*(straightness<0.7?0.8:0.3));
+        if(selfIntersect)add('Limacon','limacon','🐚',(cvR>0.06?0.8:0.3)*(nCorners<=5?0.7:0.2)*(smoothness>0.1?0.6:0.2)*(crossCount>=1?0.75:0.4)*(aspect<1.7?0.7:0.3));
+        if(selfIntersect)add('Pretzel','pretzel','🥨',(crossCount>=2?0.7:crossCount===1?0.4:0.15)*(smoothness>0.15?0.7:0.3)*(straightness<0.6?0.7:0.3));
+        add('Cardioid','cardioid','❤️',(cvR>0.03?0.7:0.2)*(nCorners<=5?0.65:0.15)*(smoothness>0.15?0.6:0.15)*(aspect<1.7?0.65:0.2)*(centroidOffset>0.005?0.8:0.3)*(selfIntersect?0.6:0.85));
+        add('Stick Figure','stickfigure','🤖',(selfIntersect?0.5:0.2)*(sharpTurns>=2?0.5:0.2)*(concavity>0.05?0.4:0.15));
+      }
+      cands.sort((a,b)=>b.score-a.score);
+      const topScore = cands.length > 0 ? cands[0].score : 0;
+      // Show shapes that are reasonably close — generous to surface weird-shape suggestions
+      let result = cands.filter(c => c.score >= 0.12 && c.score >= topScore * 0.28).slice(0, 6);
+      if (result.length === 0 && topScore >= 0.10) result = cands.slice(0, 1);
+      return result;
+    }
+
+    // Rebuild the scope/audio trace from all committed strokes.
+    // The Draw Box keeps every stroke (no connectors drawn); the scope
+    // traces the strokes in order, with straight jumps between them.
+    function rebuildScopePathFromStrokes() {
+      if (!drawStrokes || drawStrokes.length === 0) {
+        currentPath = [];
+        pathIsClosed = false;
+        updateAudioBuffer();
+        return;
+      }
+      const flat = [];
+      for (const st of drawStrokes) {
+        if (!st) continue;
+        for (const p of st) flat.push({ x: p.x, y: p.y });
+      }
+      if (flat.length < 2) {
+        currentPath = flat;
+        pathIsClosed = false;
+        updateAudioBuffer();
+        return;
+      }
+      const fp = flat[0], lp = flat[flat.length - 1];
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (const p of flat) {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      }
+      const diagLen = Math.hypot(maxX - minX, maxY - minY) || 0.001;
+      const endGap = Math.hypot(fp.x - lp.x, fp.y - lp.y);
+      pathIsClosed = endGap < diagLen * 0.15 || (autoClose && flat.length > 3);
+      if (pathIsClosed && endGap < 0.005) flat.pop();
+      currentPath = resamplePath(flat, 512, pathIsClosed);
+      updateAudioBuffer();
+    }
+
+    function applyPerfectShape(shapeName) {
+      if (!drawStrokes || drawStrokes.length === 0) return;
+      const lastStroke = drawStrokes[drawStrokes.length - 1];
+      if (!lastStroke || lastStroke.length < 3) return;
+      const newPath = generatePerfectShape(shapeName);
+      if (!newPath || newPath.length === 0) return;
+      // Center the perfect shape on the last-drawn stroke, replacing only it.
+      let sumX = 0, sumY = 0;
+      lastStroke.forEach(p => { sumX += p.x; sumY += p.y; });
+      const dcx = sumX / lastStroke.length, dcy = sumY / lastStroke.length;
+      let pSumX = 0, pSumY = 0;
+      newPath.forEach(p => { pSumX += p.x; pSumY += p.y; });
+      const pcx = pSumX / newPath.length, pcy = pSumY / newPath.length;
+      const dx = dcx - pcx, dy = dcy - pcy;
+      const shifted = newPath.map(p => ({ x: p.x + dx, y: p.y + dy }));
+      const fp = shifted[0], lp = shifted[shifted.length - 1];
+      if (Math.hypot(fp.x - lp.x, fp.y - lp.y) < 0.005) shifted.pop();
+      drawStrokes[drawStrokes.length - 1] = shifted;
+      rebuildScopePathFromStrokes();
+      drawDrawCanvas();
+    }
+
+    function populateSuggestionBar(suggestions) {
+      const btnCtn = document.getElementById('suggestionButtons');
+      if (!btnCtn) return;
+      btnCtn.innerHTML = '';
+      suggestions.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'shape-btn';
+        btn.dataset.shape = s.shape;
+        btn.innerHTML = `<span style="font-size:1.1rem">${s.icon}</span> ${s.name}`;
+        btn.style.cssText = 'display:flex;align-items:center;gap:4px;background:#223322;color:#ccffcc;border:1px solid #445544;padding:4px 10px;border-radius:5px;font-size:0.78rem;cursor:pointer;transition:all 0.1s ease;';
+        btnCtn.appendChild(btn);
+      });
+    }
+    
+    // ==================== LISSAJOUS GRID (was dead UI: button had no handler) ====================
+    function lissajousPath(a, b, phase) {
+      const pts = [];
+      const n = 256;
+      const ph = (phase === undefined) ? Math.PI / 2 : phase;
+      for (let i = 0; i < n; i++) {
+        const t = (i / n) * Math.PI * 2;
+        pts.push({ x: Math.sin(a * t + ph) * 0.8, y: Math.sin(b * t) * 0.8 });
+      }
+      return pts;
+    }
+    function populateLissajousGrid() {
+      const grid = document.getElementById('lissajousGrid');
+      if (!grid || grid.children.length > 0) return;
+      const ratios = [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[3,2],[3,4],[4,3],[3,5],[5,3],[4,5]];
+      ratios.forEach(function(rb) {
+        const a = rb[0], b = rb[1];
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#0d120d;border:2px solid #334433;border-radius:8px;padding:8px;text-align:center;cursor:pointer;';
+        const cv = document.createElement('canvas');
+        cv.width = 110; cv.height = 90;
+        cv.style.cssText = 'width:100%;height:90px;background:#000;border:1px solid #223322;border-radius:4px;';
+        const ctx = cv.getContext('2d');
+        ctx.strokeStyle = '#00ff9f';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#00ff9f';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        const path = lissajousPath(a, b, Math.PI / 2);
+        for (let i = 0; i < path.length; i++) {
+          const px = 55 + path[i].x * 48;
+          const py = 45 - path[i].y * 38;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        const lb = document.createElement('div');
+        lb.style.cssText = 'color:#88cc88;font-size:0.8rem;margin-top:4px;';
+        lb.textContent = a + ':' + b;
+        card.appendChild(cv);
+        card.appendChild(lb);
+        card.title = 'Load ' + a + ':' + b + ' to scope';
+        card.addEventListener('click', function() {
+          const full = lissajousPath(a, b, Math.PI / 2);
+          drawStrokes = [full];
+          rebuildScopePathFromStrokes();
+          drawDrawCanvas();
+          closeLissajousGrid();
+        });
+        card.addEventListener('mouseenter', function() { card.style.borderColor = '#00ff9f'; });
+        card.addEventListener('mouseleave', function() { card.style.borderColor = '#334433'; });
+        grid.appendChild(card);
+      });
+    }
+    function openLissajousGrid() {
+      populateLissajousGrid();
+      const sv = document.getElementById('scopeView');
+      const gv = document.getElementById('lissajousGridView');
+      if (sv) sv.style.display = 'none';
+      if (gv) gv.style.display = 'block';
+    }
+    function closeLissajousGrid() {
+      const sv = document.getElementById('scopeView');
+      const gv = document.getElementById('lissajousGridView');
+      if (gv) gv.style.display = 'none';
+      if (sv) sv.style.display = 'block';
+    }
+
+   // ==================== DRAW CANVAS ====================
+   function drawDrawCanvas() {
+      if (!drawCtx) return;
+      const w = drawCanvas.width;
+      const h = drawCanvas.height;
+      
+      // Background
+      drawCtx.fillStyle = '#f4f7f4';
+      drawCtx.fillRect(0, 0, w, h);
+      
+      // Faint grid / cross
+      drawCtx.strokeStyle = '#d0d6d0';
+      drawCtx.lineWidth = 1;
+      drawCtx.beginPath();
+      drawCtx.moveTo(w/2, 0);
+      drawCtx.lineTo(w/2, h);
+      drawCtx.moveTo(0, h/2);
+      drawCtx.lineTo(w, h/2);
+      drawCtx.stroke();
+      
+     // Draw committed path (blue)
+      // Draw committed strokes (blue) — each stroke separately, no connectors
+      if (drawStrokes && drawStrokes.length > 0) {
+        drawCtx.strokeStyle = '#0066cc';
+        drawCtx.lineWidth = drawLineWidth;
+        drawCtx.lineJoin = 'round';
+        drawCtx.lineCap = 'round';
+        for (const stroke of drawStrokes) {
+          if (!stroke || stroke.length < 2) continue;
+          drawCtx.beginPath();
+          stroke.forEach((pt, i) => {
+            const sx = (pt.x * 0.5 + 0.5) * w;
+            const sy = (0.5 - pt.y * 0.5) * h;
+            if (i === 0) drawCtx.moveTo(sx, sy);
+            else drawCtx.lineTo(sx, sy);
+          });
+          drawCtx.stroke();
+        }
+      }
+      
+      // Current stroke in progress (red)
+      if (isDrawing && strokePoints.length > 1) {
+        drawCtx.strokeStyle = '#dd3300';
+        drawCtx.lineWidth = drawLineWidth * 1.3;
+        drawCtx.lineJoin = 'round';
+        drawCtx.lineCap = 'round';
+        drawCtx.beginPath();
+        strokePoints.forEach((pt, i) => {
+          const sx = (pt.x * 0.5 + 0.5) * w;
+          const sy = (0.5 - pt.y * 0.5) * h;
+          if (i === 0) drawCtx.moveTo(sx, sy);
+          else drawCtx.lineTo(sx, sy);
+        });
+        drawCtx.stroke();
+      }
+    }
+    
+    // ==================== AUDIO ====================
+    // Generates the stereo shape signal (X = L, Y = R). Always runs so the scope
+    // has a live signal even while the sound is muted — muting happens at the gain node.
+    // Single-sample step of the shape voice. Used by the live ScriptProcessor
+    // AND by the D2S.renderSamples test hook below, so measurements exercise
+    // the exact code path that reaches the speakers.
+    function advanceShapeSample(sr) {
+      // Sample-accurate phase advance
+      audioPhase += currentFreq / sr;
+      audioPhase %= 1.0;
+
+      // Advance rotate phase independently (supports negative rotateFreq for opposite direction)
+      audioRotatePhase = (((audioRotatePhase + rotateFreq / sr) % 1) + 1) % 1;
+
+      // Advance smooth unbounded osc phase for sinusoidal mode (NO modulo = zero discontinuities)
+      audioOscPhase += currentFreq / sr;
+
+      let audioParam = audioPhase;
+      if (oscillateMode) {
+        // Sinusoidal ping-pong: zero velocity at the turnarounds, so open
+        // paths reverse smoothly with no clicks — exactly what the checkbox
+        // promises ("slows at ends, reverses direction smoothly"). The output
+        // is the true path position at every sample: no smoothing filter.
+        const t = audioOscPhase % 1.0;
+        audioParam = 0.5 - 0.5 * Math.cos(t * 2 * Math.PI);
+      }
+
+      const p = getAudioTransformedPos(audioParam);
+      return [p.x, p.y];
+    }
+
+    // Scope draw for one 1024-sample block — verbatim dood.al doScriptProcessor
+    // scope section: optional sweep remap, Lanczos upsampling, drawLineTexture,
+    // then save to oldX/oldY. Reads the live `doodal` controls exactly like the
+    // reference reads its `controls`.
+    function doodalScopeDraw(xRaw, yRaw) {
+      if (!doodalActive || !window.DoodalRender || !window.DoodalFilter || !window.DoodalFilter.K) return;
+      const len = xRaw.length;
+      for (let i = 0; i < len; i++) {
+        scopeX[i] = xRaw[i];
+        scopeY[i] = yRaw[i];
+      }
+
+      if (doodal.sweepOn && audioCtx) {
+        const gain = Math.pow(2.0, doodal.mainGain);
+        const sweepMinTime = doodal.sweepMsDiv * 10 / 1000;
+        const triggerValue = doodal.sweepTriggerValue;
+        const timePerSample = 1 / audioCtx.sampleRate;
+        for (let i = 0; i < len; i++) {
+          scopeX[i] = sweepPosition / gain;
+          sweepPosition += 2 * timePerSample / sweepMinTime;
+          if (sweepPosition > 1.1 && belowTrigger && scopeY[i] >= triggerValue)
+            sweepPosition = -1.3;
+          belowTrigger = scopeY[i] < triggerValue;
+        }
+      }
+
+      if (!doodal.freezeImage) {
+        if (!doodal.disableFilter) {
+          window.DoodalFilter.generateSmoothedSamples(scopeOldX, scopeX, scopeSmX);
+          window.DoodalFilter.generateSmoothedSamples(scopeOldY, scopeY, scopeSmY);
+          if (!doodal.swapXY) window.DoodalRender.drawLineTexture(scopeSmX, scopeSmY);
+          else window.DoodalRender.drawLineTexture(scopeSmY, scopeSmX);
+        } else {
+          if (!doodal.swapXY) window.DoodalRender.drawLineTexture(scopeX, scopeY);
+          else window.DoodalRender.drawLineTexture(scopeY, scopeX);
+        }
+      }
+
+      for (let i = 0; i < len; i++) {
+        scopeOldX[i] = scopeX[i];
+        scopeOldY[i] = scopeY[i];
+      }
+    }
+
+    // Mic curve -> scope stereo pair (raw -1..1 in both channels, like a line
+    // source; the Hilbert phase-shift option mirrors the previous mono->stereo
+    // behaviour). Rendered through the identical doodalScopeDraw path.
+    const _micScopeL = new Float32Array(DOODAL_BUFFER);
+    const _micScopeR = new Float32Array(DOODAL_BUFFER);
+    function doodalMicScopeSamples() {
+      const len = DOODAL_BUFFER;
+      _micScopeL.fill(0);
+      _micScopeR.fill(0);
+      if (!micEnabled || !micAnalyser || !micTimeData) return [_micScopeL, _micScopeR];
+      micAnalyser.getFloatTimeDomainData(micTimeData);
+      const N = micTimeData.length;
+      if (micIsStereo && window._micAnalyserR && micTimeDataR) {
+        window._micAnalyserR.getFloatTimeDomainData(micTimeDataR);
+      }
+      const half = Math.floor(N / 2);
+      const cosT = Math.cos(micPhase);
+      const sinT = Math.sin(micPhase);
+      if (micPhase !== 0) {
+        computeHilbertFFT(micTimeData, N);
+        for (let i = 0; i < len; i++) {
+          const j = half + i;
+          if (j >= N) break;
+          const I = micI[j];
+          const Q = micQ[j];
+          _micScopeL[i] = I;
+          _micScopeR[i] = cosT * I + sinT * Q;
+        }
+      } else if (micIsStereo && micTimeDataR) {
+        for (let i = 0; i < len; i++) {
+          const j = half + i;
+          if (j >= N) break;
+          _micScopeL[i] = micTimeData[j];
+          _micScopeR[i] = micTimeDataR[j];
+        }
+      } else {
+        for (let i = 0; i < len; i++) {
+          const j = half + i;
+          if (j >= N) break;
+          const s = micTimeData[j];
+          _micScopeL[i] = s;
+          _micScopeR[i] = s;
+        }
+      }
+      // Capture the latest raw curve (for freeze-to-draw-box on mic-off)
+      if (lastMicLissajous === null) lastMicLissajous = [];
+      lastMicLissajous.length = 0;
+      const skip = Math.floor(N * 0.12);
+      const end = N - skip;
+      if (micPhase !== 0) {
+        for (let j = skip; j < end; j++) {
+          const I = micI[j];
+          const Q = micQ[j];
+          lastMicLissajous.push({ x: I, y: cosT * I + sinT * Q });
+        }
+      } else {
+        for (let j = skip; j < end; j++) {
+          const L = micTimeData[j];
+          const R = (micIsStereo && micTimeDataR) ? micTimeDataR[j] : L;
+          lastMicLissajous.push({ x: L, y: R });
+        }
+      }
+      return [_micScopeL, _micScopeR];
+    }
+
+    function generateScopeSamples(e) {
+      const outputL = e.outputBuffer.getChannelData(0);
+      const outputR = e.outputBuffer.getChannelData(1);
+      const len = outputL.length;
+
+      if (currentPath.length === 0 || !audioCtx) {
+        for (let i = 0; i < len; i++) {
+          outputL[i] = 0;
+          outputR[i] = 0;
+        }
+        if (micEnabled) {
+          const [mL, mR] = doodalMicScopeSamples();
+          doodalScopeDraw(mL, mR);
+        } else {
+          doodalScopeDraw(outputL, outputR);
+        }
+        return;
+      }
+
+      const sr = audioCtx.sampleRate;
+
+      for (let i = 0; i < len; i++) {
+        const s = advanceShapeSample(sr);
+        outputL[i] = s[0];
+        outputR[i] = s[1];
+      }
+      // The scope taps the same pre-volume samples the speakers play — exactly
+      // where dood.al's scopeNode sits (before its audioVolumeNode). Mic mode
+      // swaps the scope source to live input, like mic->scopeNode upstream.
+      if (micEnabled) {
+        const [mL, mR] = doodalMicScopeSamples();
+        doodalScopeDraw(mL, mR);
+      } else {
+        doodalScopeDraw(outputL, outputR);
+      }
+    }
+    
+    function initAudio() {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        scriptNode = audioCtx.createScriptProcessor(1024, 0, 2);
+        gainNode = audioCtx.createGain();
+        scriptNode.onaudioprocess = generateScopeSamples;
+        gainNode.gain.value = 0;
+        scriptNode.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+      } catch (err) {
+        console.warn('Web Audio API not available:', err);
+        alert('Sorry, Web Audio is not supported in this browser.');
+      }
+    }
+    
+    function updateSoundGain() {
+      if (!gainNode) return;
+      const slider = document.getElementById('volumeSlider');
+      const vol = slider ? parseFloat(slider.value) : 0.6;
+      gainNode.gain.value = soundEnabled ? vol : 0;
+    }
+    
+    function enableSound() {
+      if (!audioCtx || !scriptNode || !gainNode) {
+        initAudio();
+      }
+      soundEnabled = true;
+      updateSoundGain();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    }
+    
+    function disableSound() {
+      soundEnabled = false;
+      updateSoundGain();
+    }
+    
+    // ==================== DOODAL CRT RENDERER ====================
+
+    // Builds the live audio feed and starts the dood.al CRT display.
+    // The scope canvas is rendered solely by src/doodal-scope.js (verbatim
+    // dood.al pipeline: Lanczos-upsampled gaussian beam -> phosphor fade ->
+    // dual blur glow -> exposure/hue/graticule output). The single
+    // ScriptProcessor both plays the shape (post-gainNode volume) and draws
+    // the identical pre-volume samples — same topology as dood.al's scopeNode.
+    function setupDoodalRenderer() {
+      initAudio();
+      if (!audioCtx || !scriptNode) return false;
+      try {
+        window.DoodalFilter.init(DOODAL_BUFFER, 8, 6);
+        scopeSmX = new Float32Array(window.DoodalFilter.nSmoothedSamples);
+        scopeSmY = new Float32Array(window.DoodalFilter.nSmoothedSamples);
+        window.DoodalRender.init(scopeCanvas, doodal, {
+          bufferSize: DOODAL_BUFFER,
+          filterSteps: window.DoodalFilter.steps,
+          noiseUrl: 'src/noise.jpg',
+          lineSize: doodalLineSize
+        });
+        window.DoodalRender.setupArrays(window.DoodalFilter.nSmoothedSamples);
+        syncScopeSettings();
+        requestAnimationFrame(function drawCRTFrame() {
+          if (doodalActive) {
+            try { window.DoodalRender.drawCRT(); } catch (err) {}
+          }
+          requestAnimationFrame(drawCRTFrame);
+        });
+        doodalActive = true;
+        resumeAudioOnGesture();
+      } catch (err) {
+        console.warn('doodal scope unavailable:', err);
+        try {
+          if (scriptNode) scriptNode.disconnect();
+          if (gainNode) gainNode.disconnect();
+        } catch (e) {}
+        scriptNode = null;
+        gainNode = null;
+        audioCtx = null;
+        doodalActive = false;
+        return false;
+      }
+      return doodalActive;
+    }
+    
+    function resumeAudioOnGesture() {
+      const tryResume = () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+      };
+      tryResume();
+      const start = () => {
+        tryResume();
+        document.removeEventListener('pointerdown', start, true);
+        document.removeEventListener('keydown', start, true);
+      };
+      document.addEventListener('pointerdown', start, true);
+      document.addEventListener('keydown', start, true);
+    }
+    
+    // ==================== SCOPE LABELS ====================
+    // The trace is rendered entirely by the dood.al CRT pipeline — the only
+    // overlays here are the HTML corner labels and the placeholder hint div.
+    function updateScopeLabels() {
+      const modeEl = document.getElementById('modeLabel');
+      const freqEl = document.getElementById('freqLabel');
+      if (modeEl) modeEl.textContent = micEnabled ? 'MIC INPUT' : (sweepMode ? 'SWEEP / YT' : 'XY / LISSAJOUS');
+      if (freqEl) freqEl.textContent = micEnabled
+        ? (micIsStereo ? 'STEREO IN' : (micPhase === 0 ? 'MONO' : 'STEREO ' + Math.round(micPhase * 180 / Math.PI) + '°'))
+        : currentFreq.toFixed(1) + ' Hz';
+    }
+    
+    function updateScopeHint() {
+      const hintEl = document.getElementById('scopeHint');
+      if (!hintEl) return;
+      let msg = '';
+      if (!doodalActive) {
+        msg = 'WebGL is required for the oscilloscope display — this browser does not support it.';
+      } else if (audioCtx && audioCtx.state === 'suspended') {
+        msg = 'Click / draw anywhere to power up the scope ⚡';
+      } else if (micEnabled) {
+        msg = '';
+      } else if (currentPath.length === 0) {
+        msg = 'Draw a shape in the box on the left → it will appear here exactly as drawn';
+      }
+      hintEl.textContent = msg;
+      hintEl.style.display = msg ? 'flex' : 'none';
+    }
+    
+    // ==================== MICROPHONE MODE ====================
+    async function enableMic() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 } });
+        const source = audioCtx.createMediaStreamSource(micStream);
+        // Detect true stereo input
+        const track = micStream.getAudioTracks()[0];
+        micIsStereo = track && track.getSettings && track.getSettings().channelCount === 2;
+        
+        if (micIsStereo) {
+          // Split L and R into separate analysers
+          const splitter = audioCtx.createChannelSplitter(2);
+          source.connect(splitter);
+          micAnalyser = audioCtx.createAnalyser();
+          micAnalyser.fftSize = 2048;
+          micAnalyser.smoothingTimeConstant = 0;
+          splitter.connect(micAnalyser, 0);
+          const micAnalyserR = audioCtx.createAnalyser();
+          micAnalyserR.fftSize = 2048;
+          micAnalyserR.smoothingTimeConstant = 0;
+          splitter.connect(micAnalyserR, 1);
+          // Zero-gain sink to pull data through
+          const micGain = audioCtx.createGain();
+          micGain.gain.value = 0;
+          micAnalyser.connect(micGain);
+          micAnalyserR.connect(micGain);
+          micGain.connect(audioCtx.destination);
+          window._micAnalyserR = micAnalyserR;
+          micTimeData = new Float32Array(micAnalyser.fftSize);
+          micTimeDataR = new Float32Array(micAnalyserR.fftSize);
+        } else {
+          micAnalyser = audioCtx.createAnalyser();
+          micAnalyser.fftSize = 2048;
+          micAnalyser.smoothingTimeConstant = 0;
+          source.connect(micAnalyser);
+          const micGain = audioCtx.createGain();
+          micGain.gain.value = 0;
+          micAnalyser.connect(micGain);
+          micGain.connect(audioCtx.destination);
+          micTimeData = new Float32Array(micAnalyser.fftSize);
+          micTimeDataR = null;
+          window._micAnalyserR = null;
+        }
+        micEnabled = true;
+        lastMicLissajous = null; // fresh capture
+      } catch(err) {
+        console.warn('Microphone access denied:', err);
+        const micCheck = document.getElementById('micCheck');
+        if (micCheck) micCheck.checked = false;
+        alert('Could not access microphone: ' + err.message);
+      }
+    }
+    
+    function disableMic() {
+      micEnabled = false;
+      if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+      }
+      micAnalyser = null;
+      micTimeDataR = null;
+      micIsStereo = false;
+      window._micAnalyserR = null;
+
+      // Freeze the last Lissajous curve onto the Draw Box so the user can
+      // adjust frequency / transforms for it as if it had just been drawn.
+      if (lastMicLissajous && lastMicLissajous.length > 4) {
+        // Normalize: scale the captured points to fill the draw box nicely
+        let maxAbs = 0;
+        for (const p of lastMicLissajous) {
+          if (Math.abs(p.x) > maxAbs) maxAbs = Math.abs(p.x);
+          if (Math.abs(p.y) > maxAbs) maxAbs = Math.abs(p.y);
+        }
+       if (maxAbs < 0.0001) maxAbs = 1; // avoid divide-by-zero for silent input
+       const scaleUp = 0.9 / maxAbs;
+        const frozen = lastMicLissajous.map(p => ({ x: p.x * scaleUp, y: p.y * scaleUp }));
+        const ffp = frozen[0], llp = frozen[frozen.length - 1];
+        if (Math.hypot(ffp.x - llp.x, ffp.y - llp.y) < 0.005) frozen.pop();
+        drawStrokes = [frozen];
+        rebuildScopePathFromStrokes();
+        drawDrawCanvas();
+
+        // Show shape suggestions for the frozen curve
+        const suggestionBar = document.getElementById('shapeSuggestionBar');
+        if (suggestionBar && frozen.length > 2) {
+          const suggestions = recognizeShape(frozen);
+          if (suggestions.length > 0) {
+            populateSuggestionBar(suggestions);
+            suggestionBar.style.display = 'block';
+          } else {
+            suggestionBar.style.display = 'none';
+          }
+        }
+      }
+      lastMicLissajous = null;
+    }
+    
+    // ==================== UPDATE UI & STATE ====================
+    function updateFreqDisplay() {
+      const valEl = document.getElementById('freqValue');
+      if (valEl) valEl.textContent = currentFreq.toFixed(1) + ' Hz';
+      
+      const slider = document.getElementById('freqSlider');
+      const input = document.getElementById('freqInput');
+      if (slider) slider.value = Math.min(currentFreq, 1000);
+      if (input) input.value = currentFreq;
+    }
+    
+    function setFrequency(val) {
+      currentFreq = Math.max(0, Math.min(20000, parseFloat(val) || 0));
+      updateFreqDisplay();
+    }
+    
+    function updateAllSliders() {
+      // Called on load to sync displayed values
+      const persistSlider = document.getElementById('persistSlider');
+      const brightSlider = document.getElementById('brightSlider');
+      const rotateSlider = document.getElementById('rotateSlider');
+      const scaleSlider = document.getElementById('scaleSlider');
+      const offsetXSlider = document.getElementById('offsetXSlider');
+      const offsetYSlider = document.getElementById('offsetYSlider');
+      const traceSlider = document.getElementById('traceWidthSlider');
+      const volSlider = document.getElementById('volumeSlider');
+      
+      if (persistSlider) {
+        // dood.al persistence range is -1..1 (fade = 0.5^p * 0.2*buf/512);
+        // the UI slider 5..95 maps linearly onto it.
+        doodal.persistence = (parseFloat(persistSlider.value) - 50) / 45;
+      }
+      if (brightSlider) {
+        // dood.al exposure range is -2..+2 stops (out = 2^(exp-2));
+        // the UI slider 10..100 maps linearly onto it.
+        doodal.exposureStops = ((parseFloat(brightSlider.value) - 10) / 90) * 4 - 2;
+      }
+      if (rotateSlider) rotation = parseFloat(rotateSlider.value) * Math.PI / 180;
+      if (scaleSlider) scaleVal = parseFloat(scaleSlider.value);
+      if (offsetXSlider) offsetX = parseFloat(offsetXSlider.value);
+      if (offsetYSlider) offsetY = parseFloat(offsetYSlider.value);
+      if (traceSlider) {
+        traceWidth = parseFloat(traceSlider.value);
+        doodalLineSize = 0.015 * (traceWidth / 1.8);
+      }
+      updateSoundGain();
+      syncScopeSettings();
+    }
+    
+    function syncScopeSettings() {
+      doodal.sweepOn = sweepMode;
+      if (window.DoodalRender && doodalActive) {
+        window.DoodalRender.lineSize = doodalLineSize;
+      }
+    }
+    
+    function attachEventListeners() {
+      // Frequency slider
+      const freqSlider = document.getElementById('freqSlider');
+      const freqInput = document.getElementById('freqInput');
+      
+      freqSlider.addEventListener('input', () => {
+        setFrequency(freqSlider.value);
+      });
+      
+      freqInput.addEventListener('input', () => {
+        const v = parseFloat(freqInput.value);
+        if (!isNaN(v)) setFrequency(v);
+      });
+      
+      freqInput.addEventListener('blur', () => {
+        // clamp and sync
+        if (currentFreq > 1000) {
+          freqSlider.value = 1000;
+        } else {
+          freqSlider.value = currentFreq;
+        }
+      });
+      
+      // Sweep mode
+      document.getElementById('sweepCheck').addEventListener('change', (e) => {
+        sweepMode = e.target.checked;
+        doodal.sweepOn = sweepMode;
+      });
+      
+      // Oscillate mode (sinusoidal back & forth)
+      document.getElementById('oscillateCheck').addEventListener('change', (e) => {
+        oscillateMode = e.target.checked;
+      });
+      
+      // Auto-Close
+      document.getElementById('autoCloseCheck').addEventListener('change', (e) => {
+        autoClose = e.target.checked;
+        if (currentPath.length > 2 && autoClose && !pathIsClosed) {
+          pathIsClosed = true;
+          updateAudioBuffer();
+        }
+      });
+      
+      // Sound
+      const soundCheck = document.getElementById('soundCheck');
+      soundCheck.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          enableSound();
+        } else {
+          disableSound();
+        }
+      });
+      
+      // Microphone
+      const micCheck = document.getElementById('micCheck');
+      micCheck.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          enableMic();
+        } else {
+          disableMic();
+        }
+      });
+      
+      // Mic stereo phase shift
+      const micStereoCheck = document.getElementById('micStereoCheck');
+      micStereoCheck.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          micPhase = parseFloat(document.getElementById('micPhaseSlider').value) * Math.PI / 180;
+        } else {
+          micPhase = 0;
+        }
+      });
+      
+      const micPhaseSlider = document.getElementById('micPhaseSlider');
+      const micPhaseValEl = document.getElementById('micPhaseVal');
+      micPhaseSlider.addEventListener('input', () => {
+        const v = parseFloat(micPhaseSlider.value);
+        micPhaseValEl.textContent = v + '°';
+        const stereoCheck = document.getElementById('micStereoCheck');
+        if (stereoCheck && stereoCheck.checked) {
+          micPhase = v * Math.PI / 180;
+        }
+      });
+      
+      // Volume
+      const volSlider = document.getElementById('volumeSlider');
+      const volVal = document.getElementById('volValue');
+      volSlider.addEventListener('input', () => {
+        updateSoundGain();
+        if (volVal) volVal.textContent = parseFloat(volSlider.value).toFixed(2);
+      });
+      
+      // Persistence — dood.al range -1..1 (UI slider 5..95 maps linearly)
+      const persistSlider = document.getElementById('persistSlider');
+      const persistVal = document.getElementById('persistVal');
+      persistSlider.addEventListener('input', () => {
+        const v = parseFloat(persistSlider.value);
+        doodal.persistence = (v - 50) / 45;
+        if (persistVal) persistVal.textContent = Math.round(v);
+      });
+      
+      // Brightness — dood.al exposure stops -2..+2 (UI slider 10..100 maps linearly)
+      const brightSlider = document.getElementById('brightSlider');
+      const brightVal = document.getElementById('brightVal');
+      brightSlider.addEventListener('input', () => {
+        const v = parseFloat(brightSlider.value);
+        doodal.exposureStops = ((v - 10) / 90) * 4 - 2;
+        if (brightVal) brightVal.textContent = Math.round(v);
+      });
+      
+      // Rotation (static angle)
+      const rotSlider = document.getElementById('rotateSlider');
+      const rotVal = document.getElementById('rotateVal');
+      rotSlider.addEventListener('input', () => {
+        const v = parseFloat(rotSlider.value);
+        rotation = v * Math.PI / 180;
+        if (rotVal) rotVal.textContent = v + '°';
+      });
+      
+      // Rotate Frequency (continuous spinning)
+      const rotFreqSlider = document.getElementById('rotateFreqSlider');
+      const rotFreqInput = document.getElementById('rotateFreqInput');
+      rotFreqSlider.addEventListener('input', () => {
+        rotateFreq = parseFloat(rotFreqSlider.value);
+        if (rotFreqInput) rotFreqInput.value = rotateFreq;
+      });
+      rotFreqInput.addEventListener('input', () => {
+        const v = parseFloat(rotFreqInput.value);
+        if (!isNaN(v)) {
+          rotateFreq = Math.max(-1000, Math.min(1000, v));  // allow negative
+          rotFreqSlider.value = rotateFreq;
+        }
+      });
+      
+      // Scale
+      const scaleSlider = document.getElementById('scaleSlider');
+      const scaleValEl = document.getElementById('scaleVal');
+      scaleSlider.addEventListener('input', () => {
+        scaleVal = parseFloat(scaleSlider.value);
+        if (scaleValEl) scaleValEl.textContent = scaleVal.toFixed(2);
+      });
+      
+      // Offset X
+      const offXSlider = document.getElementById('offsetXSlider');
+      const offXVal = document.getElementById('offsetXVal');
+      offXSlider.addEventListener('input', () => {
+        offsetX = parseFloat(offXSlider.value);
+        if (offXVal) offXVal.textContent = offsetX.toFixed(2);
+      });
+      
+      // Offset Y
+      const offYSlider = document.getElementById('offsetYSlider');
+      const offYVal = document.getElementById('offsetYVal');
+      offYSlider.addEventListener('input', () => {
+        offsetY = parseFloat(offYSlider.value);
+        if (offYVal) offYVal.textContent = offsetY.toFixed(2);
+      });
+      
+      // Trace width — scales dood.al's uSize around its 0.015 default
+      const traceSlider = document.getElementById('traceWidthSlider');
+      const traceVal = document.getElementById('traceWidthVal');
+      traceSlider.addEventListener('input', () => {
+        traceWidth = parseFloat(traceSlider.value);
+        if (traceVal) traceVal.textContent = traceWidth.toFixed(1);
+        doodalLineSize = 0.015 * (traceWidth / 1.8);
+        if (window.DoodalRender && doodalActive) window.DoodalRender.lineSize = doodalLineSize;
+      });
+      
+      // Reset transforms
+      document.getElementById('resetTransBtn').addEventListener('click', () => {
+        rotation = 0;
+        scaleVal = 1.0;
+        offsetX = 0;
+        offsetY = 0;
+        
+        // Reset sliders
+        document.getElementById('rotateSlider').value = 0;
+        document.getElementById('rotateVal').textContent = '0°';
+        document.getElementById('scaleSlider').value = 1;
+        document.getElementById('scaleVal').textContent = '1.00';
+        document.getElementById('offsetXSlider').value = 0;
+        document.getElementById('offsetXVal').textContent = '0.00';
+        document.getElementById('offsetYSlider').value = 0;
+        document.getElementById('offsetYVal').textContent = '0.00';
+      });
+      
+     // Clear button
+     document.getElementById('clearBtn').addEventListener('click', () => {
+       currentPath = [];
+        drawStrokes = [];
+       pathIsClosed = false;
+       strokePoints = [];
+       isDrawing = false;
+       drawDrawCanvas();
+       updateAudioBuffer();
+       // scope will clear on next frame
+     });
+      
+     // Default shape button
+     document.getElementById('defaultBtn').addEventListener('click', () => {
+       createDefaultPath();
+       drawDrawCanvas();
+     });
+     
+     
+     // Draw line thickness slider
+      
+      // Lissajous Grid (was dead UI — no handler, grid never populated)
+      document.getElementById('lissajousGridBtn').addEventListener('click', openLissajousGrid);
+      document.getElementById('closeGridBtn').addEventListener('click', closeLissajousGrid);
+      const drawLineSlider = document.getElementById('drawLineSlider');
+      const drawLineVal = document.getElementById('drawLineVal');
+      drawLineSlider.addEventListener('input', () => {
+        drawLineWidth = parseFloat(drawLineSlider.value);
+        if (drawLineVal) drawLineVal.textContent = drawLineWidth.toFixed(1);
+        drawDrawCanvas();  // update preview immediately
+      });
+      
+      // (Hide Background Shape checkbox removed per user request)
+
+      // === SHAPE SUGGESTION BAR — event delegation for dynamic buttons ===
+      document.getElementById('suggestionButtons').addEventListener('click', (e) => {
+        const btn = e.target.closest('.shape-btn');
+        if (!btn) return;
+        applyPerfectShape(btn.dataset.shape);
+      });
+      
+      // === DRAW CANVAS EVENTS (mouse + touch) ===
+      drawCanvas.addEventListener('mousedown', startDrawing);
+      drawCanvas.addEventListener('mousemove', continueDrawing);
+      window.addEventListener('mouseup', endDrawing);
+      
+      drawCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrawing(e);
+      }, {passive: false});
+      
+      drawCanvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        continueDrawing(e);
+      }, {passive: false});
+      
+      drawCanvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        endDrawing(e);
+      });
+      
+      // Prevent context menu on canvas
+      drawCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+    
+   function startDrawing(e) {
+     isDrawing = true;
+     strokePoints = [];
+     
+     const pos = getPointerPos(e, drawCanvas);
+     const norm = getNormPoint(pos.x, pos.y, drawCanvas.width, drawCanvas.height);
+     strokePoints.push(norm);
+     
+     // Suggestion bar stays visible during new drawing
+      // Keep existing strokes — only the Clear button clears the drawing.
+     drawDrawCanvas();
+   }
+    
+    function continueDrawing(e) {
+      if (!isDrawing) return;
+      
+      const pos = getPointerPos(e, drawCanvas);
+      const norm = getNormPoint(pos.x, pos.y, drawCanvas.width, drawCanvas.height);
+      
+      const last = strokePoints[strokePoints.length - 1];
+      const dist = Math.hypot(norm.x - last.x, norm.y - last.y);
+      
+      if (dist > 0.0035) {  // avoid too many points
+        strokePoints.push(norm);
+        drawDrawCanvas();
+        // Live preview is drawn by the dood.al CRT pipeline at constant
+        // frequency speed (independent of mouse movement speed or pauses)
+      }
+    }
+    
+   function endDrawing(e) {
+     if (!isDrawing) return;
+     isDrawing = false;
+     
+     if (strokePoints.length > 2) {
+        // Append — never replace. Earlier strokes stay on the Draw Box.
+        const newStroke = simplifyPath(strokePoints);
+        const sfp = newStroke[0], slp = newStroke[newStroke.length - 1];
+        if (Math.hypot(sfp.x - slp.x, sfp.y - slp.y) < 0.005) newStroke.pop();
+        drawStrokes.push(newStroke);
+        rebuildScopePathFromStrokes();
+     }
+     
+     strokePoints = [];
+     drawDrawCanvas();
+
+      // Show suggestion bar after drawing — only if close matches found.
+      // Recognize just the finished stroke so earlier strokes are untouched.
+     const suggestionBar = document.getElementById('shapeSuggestionBar');
+      const lastStroke = drawStrokes.length > 0 ? drawStrokes[drawStrokes.length - 1] : null;
+      if (suggestionBar && lastStroke && lastStroke.length > 2) {
+        const suggestions = recognizeShape(lastStroke);
+       if (suggestions.length > 0) {
+         populateSuggestionBar(suggestions);
+         suggestionBar.style.display = 'block';
+       } else {
+         suggestionBar.style.display = 'none';
+       }
+     }
+   }
+    
+   // ==================== DEFAULT SHAPE ====================
+   function createDefaultPath() {
+      pathIsClosed = true;
+      const points = 300;
+      // Build the circle as a single stroke, then rebuild the scope trace.
+      const circle = [];
+      for (let i = 0; i < points; i++) {
+        const t = (i / points) * Math.PI * 2;
+        circle.push({ x: Math.cos(t) * 0.9, y: Math.sin(t) * 0.9 });
+      }
+      drawStrokes = [circle];
+      rebuildScopePathFromStrokes();
+   }
+    
+    // ==================== ANIMATION LOOP ====================
+    function startAnimation() {
+      if (animationRunning) return;
+      animationRunning = true;
+      
+      function loop() {
+        // The dood.al CRT pipeline runs its own RAF loop — this only refreshes
+        // the HTML labels and the placeholder hint.
+        updateScopeLabels();
+        updateScopeHint();
+        requestAnimationFrame(loop);
+      }
+      loop();
+    }
+    
+    // ==================== INITIALIZATION ====================
+    function init() {
+      drawCanvas = document.getElementById('drawCanvas');
+      drawCtx = drawCanvas.getContext('2d', { alpha: true });
+      
+      scopeCanvas = document.getElementById('scopeCanvas');
+      
+      // Doodal CRT is the sole renderer of the scope display
+      try {
+        doodalActive = setupDoodalRenderer();
+      } catch (err) {
+        doodalActive = false;
+        console.warn('doodal scope setup failed:', err);
+      }
+      if (!doodalActive) {
+        const hintEl = document.getElementById('scopeHint');
+        if (hintEl) {
+          hintEl.textContent = 'WebGL is required for the oscilloscope display — this browser does not support it.';
+          hintEl.style.display = 'flex';
+        }
+      }
+      
+      // Initial values from sliders (after DOM ready)
+      setTimeout(() => {
+        updateAllSliders();
+        
+        // Set initial freq
+        const initFreq = 60;
+        document.getElementById('freqSlider').value = initFreq;
+        document.getElementById('freqInput').value = initFreq;
+        currentFreq = initFreq;
+        updateFreqDisplay();
+        
+        // Initial labels
+        document.getElementById('persistVal').textContent = document.getElementById('persistSlider').value;
+        document.getElementById('brightVal').textContent = document.getElementById('brightSlider').value;
+        document.getElementById('rotateVal').textContent = document.getElementById('rotateSlider').value + '°';
+        document.getElementById('scaleVal').textContent = parseFloat(document.getElementById('scaleSlider').value).toFixed(2);
+        document.getElementById('offsetXVal').textContent = parseFloat(document.getElementById('offsetXSlider').value).toFixed(2);
+        document.getElementById('offsetYVal').textContent = parseFloat(document.getElementById('offsetYSlider').value).toFixed(2);
+        document.getElementById('traceWidthVal').textContent = parseFloat(document.getElementById('traceWidthSlider').value).toFixed(1);
+        document.getElementById('volValue').textContent = parseFloat(document.getElementById('volumeSlider').value).toFixed(2);
+        
+        // Load a nice default shape so user sees something immediately
+        createDefaultPath();
+        drawDrawCanvas();
+        
+        // Show suggestion bar for default shape — only if close matches found
+        const suggestions = recognizeShape(currentPath);
+        const suggestionBarEl = document.getElementById('shapeSuggestionBar');
+        if (suggestions.length > 0) {
+          populateSuggestionBar(suggestions);
+          if (suggestionBarEl) suggestionBarEl.style.display = 'block';
+        } else if (suggestionBarEl) {
+          suggestionBarEl.style.display = 'none';
+        }
+        
+        // Default: Sound DISABLED but volume at 100% (user request)
+        soundEnabled = false;
+        const soundCheckEl = document.getElementById('soundCheck');
+        if (soundCheckEl) soundCheckEl.checked = false;
+        
+        const volSliderEl = document.getElementById('volumeSlider');
+        const volValEl = document.getElementById('volValue');
+        if (volSliderEl) volSliderEl.value = 1.0;
+        if (volValEl) volValEl.textContent = '1.00';
+        
+        updateSoundGain();
+
+        // Start the magic
+        startAnimation();
+        
+        // Auto-enable a hint (optional - comment out if you want silent start)
+        // document.getElementById('soundCheck').checked = true;
+        // enableSound();
+      }, 80);
+      
+      attachEventListeners();
+      
+      // Keyboard shortcut hint (optional)
+      document.addEventListener('keydown', (e) => {
+        if (!e.key) return;
+        if (e.key.toLowerCase() === '?' && document.activeElement.tagName === 'BODY') {
+          const help = 'Draw2Scope shortcuts:\n' +
+                       '• Draw with mouse/touch in left box\n' +
+                       '• Press C to clear drawing\n' +
+                       '• Press D for default shape\n' +
+                       '• Press R to reset transforms';
+          alert(help);
+        }
+       if (e.key.toLowerCase() === 'c') {
+         currentPath = [];
+          drawStrokes = [];
+         pathIsClosed = false;
+         strokePoints = [];
+         isDrawing = false;
+         drawDrawCanvas();
+       }
+        if (e.key.toLowerCase() === 'd') {
+          createDefaultPath();
+          drawDrawCanvas();
+        }
+        if (e.key.toLowerCase() === 'r') {
+          document.getElementById('resetTransBtn').click();
+        }
+      });
+      
+      // Easter egg: click title to randomize a cool shape
+      const title = document.querySelector('h1');
+      if (title) {
+        title.style.cursor = 'pointer';
+       title.addEventListener('click', () => {
+          const randPts = [];
+         const n = 220 + Math.floor(Math.random() * 120);
+         const harmonics = 1 + Math.floor(Math.random() * 4);
+         for (let i = 0; i < n; i++) {
+           const t = (i / n) * Math.PI * 2;
+           const x = Math.sin(t * harmonics) * (0.6 + Math.random() * 0.35);
+           const y = Math.cos(t * (harmonics + 1)) * (0.6 + Math.random() * 0.35) + Math.sin(t * 0.5) * 0.2;
+            randPts.push({ x: x * 0.95, y: y * 0.95 });
+         }
+          drawStrokes = [randPts];
+          rebuildScopePathFromStrokes();
+         drawDrawCanvas();
+       });
+      }
+      
+      console.log('%c[Draw2Scope] Initialized successfully. Ready to draw!', 'color:#448844');
+    }
+    
+    // Public bridge for the gallery section (separate <script> block):
+    // getPath/setPath go through the live dood.al CRT audio + render pipeline.
+   window.D2S = {
+     getPath: () => currentPath,
+     setPath: (pts) => {
+        const strokeCopy = pts.map(p => ({ x: p.x, y: p.y }));
+        const traceCopy = pts.map(p => ({ x: p.x, y: p.y }));
+        drawStrokes = [strokeCopy];
+        const f = traceCopy[0], l = traceCopy[traceCopy.length - 1];
+        pathIsClosed = Math.hypot(f.x - l.x, f.y - l.y) < 0.05;
+        currentPath = traceCopy;
+        drawDrawCanvas();
+        updateAudioBuffer();
+      },
+      renderSamples: (n) => {
+        const sr = audioCtx ? audioCtx.sampleRate : 48000;
+        const L = new Float32Array(n), R = new Float32Array(n);
+        const sp = audioPhase, srp = audioRotatePhase, sop = audioOscPhase;
+        for (let i = 0; i < n; i++) {
+          const s = advanceShapeSample(sr);
+          L[i] = s[0]; R[i] = s[1];
+        }
+        audioPhase = sp; audioRotatePhase = srp; audioOscPhase = sop;
+        return { L: Array.from(L), R: Array.from(R), sr };
+      }
+    };
+
+    // Boot
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+  <script>
+    (function() {
+      try {
+        if (window.root && root.commentsPlugin) {
+          document.getElementById('commentsCtn').innerHTML = root.commentsPlugin({
+            channel: "draw2scope-comments",
+            width: "100%",
+            height: 350,
+            commentPlaceholderText: "Share a tip or favourite shape…",
+            newestCommentsAtTop: true
+          });
+        }
+      } catch (e) { console.warn("comments failed", e); }
+
+      var grid = document.getElementById('galleryGrid');
+      var status = document.getElementById('galleryStatus');
+      var onlineEl = document.getElementById('onlineStatus');
+      var nameInput = document.getElementById('galleryNameInput');
+      var socket = null;
+      var retryDelay = 1000;
+      var cache = {};
+
+      function setStatus(t) { if (status) status.textContent = t; }
+
+      function drawThumb(canvas, pts) {
+        var ctx = canvas.getContext('2d');
+        var W = canvas.width = 150, H = canvas.height = 110;
+        ctx.fillStyle = '#0a0f0a';
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = '#00ff9f';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#00ff9f';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        for (var i = 0; i < pts.length; i++) {
+          var px = W / 2 + pts[i][0] * W * 0.44;
+          var py = H / 2 - pts[i][1] * H * 0.44;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      function thumbEl(it) {
+        if (it.thumb && it.thumb.indexOf('https://user.uploads.dev/') === 0) {
+          var img = document.createElement('img');
+          img.src = it.thumb;
+          img.alt = '';
+          img.loading = 'lazy';
+          img.onerror = function() {
+            var c = document.createElement('canvas');
+            drawThumb(c, it.pts);
+            img.replaceWith(c);
+          };
+          return img;
+        }
+        var c2 = document.createElement('canvas');
+        drawThumb(c2, it.pts);
+        return c2;
+      }
+
+      async function captureScopeThumb() {
+        var src = document.getElementById('scopeCanvas');
+        if (!src || !src.width) return '';
+        var c = document.createElement('canvas');
+        c.width = 150; c.height = 110;
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, 150, 110);
+        var sa = src.width / src.height, ta = 150 / 110;
+        var sw, sh, sx, sy;
+        if (sa > ta) { sh = src.height; sw = sh * ta; sx = (src.width - sw) / 2; sy = 0; }
+        else { sw = src.width; sh = sw / ta; sx = 0; sy = (src.height - sh) / 2; }
+        ctx.drawImage(src, sx, sy, sw, sh, 0, 0, 150, 110);
+        try {
+          var px = ctx.getImageData(0, 0, 150, 110).data;
+          var lit = 0;
+          for (var p = 0; p < px.length; p += 16) {
+            if (px[p] + px[p + 1] + px[p + 2] > 60 && ++lit > 25) break;
+          }
+          if (lit <= 25) return '';
+        } catch (e) { return ''; }
+        var blob = await new Promise(function(res) { c.toBlob(res, 'image/jpeg', 0.72); });
+        if (!blob) return '';
+        var up = await root.uploadPlugin(blob);
+        if (!up || up.error || !up.url) return '';
+        return up.url;
+      }
+
+      function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function renderItems(items) {
+        grid.innerHTML = '';
+        if (!items.length) {
+          grid.innerHTML = '<div style="color:#557755;font-size:0.85rem;">No shared shapes yet — be the first!</div>';
+          return;
+        }
+        items.forEach(function(it) {
+          cache[it.id] = it;
+          var card = document.createElement('div');
+          card.className = 'g-card';
+          card.appendChild(thumbEl(it));
+          var nm = document.createElement('div');
+          nm.className = 'g-name';
+          nm.textContent = it.name;
+          card.appendChild(nm);
+          var meta = document.createElement('div');
+          meta.className = 'g-meta';
+          meta.innerHTML = '♥ <span>' + it.likes + '</span>';
+          card.appendChild(meta);
+          var btns = document.createElement('div');
+          btns.className = 'g-btns';
+          var load = document.createElement('button');
+          load.textContent = 'Load';
+          load.onclick = function() { loadItem(it.id); };
+          var like = document.createElement('button');
+          like.textContent = '♥ Like';
+          like.onclick = function() { likeItem(it.id, card); };
+          btns.appendChild(load);
+          btns.appendChild(like);
+          card.appendChild(btns);
+          grid.appendChild(card);
+        });
+      }
+
+      function loadItem(id) {
+        var it = cache[id];
+        if (!it || !it.pts || it.pts.length < 2) return;
+        try {
+          window.D2S.setPath(it.pts.map(function(p) { return { x: p[0], y: p[1] }; }));
+          setStatus('Loaded "' + it.name + '" to your scope.');
+          document.getElementById('drawCanvas').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) { setStatus('Could not load shape.'); }
+      }
+
+      function likeItem(id, card) {
+        if (!socket || socket.readyState !== 1) { setStatus('Not connected yet.'); return; }
+        socket.rpc.like(String(id)).then(function(raw) {
+          var r;
+          try { r = JSON.parse(raw); } catch (e) { return; }
+          if (r.ok) {
+            var s = card.querySelector('.g-meta span');
+            if (s) s.textContent = r.likes;
+            if (cache[id]) cache[id].likes = r.likes;
+          } else if (r.err) setStatus(r.err);
+        }).catch(function() {});
+      }
+
+      function fetchPage() {
+        if (!socket || socket.readyState !== 1) return;
+        setStatus('Loading gallery…');
+        socket.rpc.getPage("0:24").then(function(raw) {
+          var r;
+          try { r = JSON.parse(raw); } catch (e) { setStatus('Gallery parse error.'); return; }
+          renderItems(r.items || []);
+          setStatus((r.total || 0) + ' shared shape' + ((r.total || 0) === 1 ? '' : 's') + '.');
+        }).catch(function() { setStatus('Gallery unavailable.'); });
+      }
+
+      document.getElementById('refreshGalleryBtn').onclick = fetchPage;
+      document.getElementById('saveToGalleryBtn').onclick = async function() {
+        if (!socket || socket.readyState !== 1) { setStatus('Not connected yet.'); return; }
+        var live = window.D2S ? window.D2S.getPath() : [];
+        if (!live || live.length < 8) { setStatus('Draw something first (8+ points).'); return; }
+        var name = (nameInput.value || '').trim() || 'Untitled';
+        var step = Math.max(1, Math.floor(live.length / 100));
+        var pts = [];
+        for (var i = 0; i < live.length && pts.length < 100; i += step) {
+          pts.push([+live[i].x.toFixed(3), +live[i].y.toFixed(3)]);
+        }
+        setStatus('Capturing scope…');
+        var thumb = '';
+        try { thumb = await captureScopeThumb(); } catch (e) { thumb = ''; }
+        setStatus('Sharing…');
+        try {
+          var raw = await socket.rpc.save(JSON.stringify({ name: name.slice(0, 24), pts: pts, thumb: thumb }));
+          var r;
+          try { r = JSON.parse(raw); } catch (e) { setStatus('Share failed.'); return; }
+          if (r.ok) { setStatus('Shared!'); nameInput.value = ''; fetchPage(); }
+          else setStatus(r.err || 'Share failed.');
+        } catch (e) { setStatus('Share failed.'); }
+      };
+
+     function connect() {
+       try {
+         socket = root.createServerSocket();
+       } catch (e) { setStatus('Gallery unavailable.'); return; }
+       socket.addEventListener('open', function() {
+         retryDelay = 1000;
+         fetchPage();
+          if (onlineEl) onlineEl.textContent = '● Connected';
+       });
+       socket.addEventListener('message', function(ev) {
+         try {
+           var m = JSON.parse(ev.data);
+           if (m.t === 'like' && cache[m.id]) {
+             cache[m.id].likes = m.likes;
+             fetchPage();
+           } else if (m.t === 'add') fetchPage();
+         } catch (e) {}
+       });
+       socket.addEventListener('close', function(ev) {
+         if (ev.code === 4403) { setStatus('Gallery unavailable off perchance.org.'); return; }
+         setStatus('Reconnecting…');
+          if (onlineEl) onlineEl.textContent = '○ Reconnecting…';
+         setTimeout(connect, retryDelay);
+         retryDelay = Math.min(retryDelay * 2, 30000);
+       });
+     }
+     if (window.root && root.createServerSocket) connect();
+     else setStatus('Gallery unavailable.');
+    })();
+  </script>
+</body>
+</html>
